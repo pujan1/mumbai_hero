@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(timeout 8 npx tsx server/src/main.ts)",
+      "Bash(npx tsc *)",
+      "Bash(python3 -c ' *)"
+    ]
+  }
+}

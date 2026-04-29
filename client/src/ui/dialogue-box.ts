@@ -19,23 +19,24 @@ export class DialogueBox extends Phaser.GameObjects.Container {
     const h = LAYOUT.DIALOGUE_HEIGHT;
 
     this.bg = scene.add.rectangle(w / 2, h / 2, w, h, 0x1a120b, 0.92);
-    this.bg.setStrokeStyle(2, 0xc8a96e);
+    this.bg.setStrokeStyle(4, 0xc8a96e);
 
-    this.speakerText = scene.add.text(12, 6, '', {
-      fontSize: '11px',
+    this.speakerText = scene.add.text(20, 12, '', {
+      fontSize: '38px',
       fontFamily: 'monospace',
       color: '#f5c842',
       fontStyle: 'bold',
     });
 
-    this.bodyText = scene.add.text(12, 22, '', {
-      fontSize: '10px',
+    this.bodyText = scene.add.text(20, 60, '', {
+      fontSize: '32px',
       fontFamily: 'monospace',
       color: '#f0e6cc',
-      wordWrap: { width: w - 24 },
+      wordWrap: { width: w - 40 },
     });
 
-    this.continueIndicator = scene.add.triangle(w - 12, h - 8, 0, 0, 8, 0, 4, 6, 0xf5c842);
+    // ▼ indicator — sized to match the larger text
+    this.continueIndicator = scene.add.triangle(w - 24, h - 14, 0, 0, 36, 0, 18, 24, 0xf5c842);
 
     this.add([this.bg, this.speakerText, this.bodyText, this.continueIndicator]);
     scene.add.existing(this);
@@ -61,8 +62,8 @@ export class DialogueBox extends Phaser.GameObjects.Container {
     this.selectedChoice = 0;
     this.clearChoices();
     choices.forEach((c, i) => {
-      const t = this.scene.add.text(16, 24 + i * 16, `> ${c.text}`, {
-        fontSize: '10px',
+      const t = this.scene.add.text(20, 60 + i * 42, `▶ ${c.text}`, {
+        fontSize: '32px',
         fontFamily: 'monospace',
         color: i === 0 ? '#f5c842' : '#f0e6cc',
       });

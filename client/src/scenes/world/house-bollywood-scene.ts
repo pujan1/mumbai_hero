@@ -27,7 +27,6 @@ export class HouseBollywoodScene extends BaseIndoorScene {
   }
 
   spawnNPCs(): void {
-    // frameWidth=250, frameHeight=249 → scale to ~56px tall to match player height
     this.addNPC(5, 4, 'elder-bollywood', 'Ramesh Ji', 'npc-elder-bollywood', elderBollywoodDialogue);
   }
 

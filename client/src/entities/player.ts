@@ -16,6 +16,7 @@ export class Player extends Phaser.GameObjects.Sprite {
     super(scene, x, y, spriteKey);
     scene.add.existing(this);
     this.setOrigin(0.5, 1);
+    this.setScale(1.3);
     this.setDepth(1);
   }
 

@@ -18,47 +18,51 @@ export class TitleScene extends Phaser.Scene {
 
   create(): void {
     const cx = LOGICAL_WIDTH / 2;
+    const SPRITE_SCALE = 3.0;
+    const SPRITE_HALF = (100 * SPRITE_SCALE) / 2; // 150px
 
     this.add.rectangle(cx, LOGICAL_HEIGHT / 2, LOGICAL_WIDTH, LOGICAL_HEIGHT, 0x0d0d2a);
 
-    this.add.text(cx, 80, 'MUMBAI HERO', {
-      fontSize: '28px', fontFamily: 'monospace', color: '#f5c842', fontStyle: 'bold',
+    this.add.text(cx, 160, 'MUMBAI HERO', {
+      fontSize: '100px', fontFamily: 'monospace', color: '#f5c842', fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    this.add.text(cx, 120, 'Your story begins here.', {
-      fontSize: '11px', fontFamily: 'monospace', color: '#aaaacc',
+    this.add.text(cx, 310, 'Your story begins here.', {
+      fontSize: '36px', fontFamily: 'monospace', color: '#aaaacc',
     }).setOrigin(0.5);
 
-    this.add.text(cx, 220, 'Choose your character', {
-      fontSize: '13px', fontFamily: 'monospace', color: '#ffffff',
+    this.add.text(cx, 460, 'Choose your character', {
+      fontSize: '42px', fontFamily: 'monospace', color: '#ffffff',
     }).setOrigin(0.5);
 
-    const boySprite = this.add.image(cx - 60, 300, 'player-boy').setScale(0.8);
-    const girlSprite = this.add.image(cx + 60, 300, 'player-girl').setScale(0.8);
-    void boySprite; void girlSprite;
-
-    this.boyLabel = this.add.text(cx - 60, 330, 'BOY', {
-      fontSize: '11px', fontFamily: 'monospace', color: '#f5c842',
+    // Boy — upper slot
+    const boyY = 650;
+    const boySprite = this.add.sprite(cx, boyY, 'player-boy', 0).setScale(SPRITE_SCALE);
+    this.boyLabel = this.add.text(cx, boyY + SPRITE_HALF + 30, 'BOY', {
+      fontSize: '44px', fontFamily: 'monospace', color: '#f5c842',
     }).setOrigin(0.5);
 
-    this.girlLabel = this.add.text(cx + 60, 330, 'GIRL', {
-      fontSize: '11px', fontFamily: 'monospace', color: '#888888',
+    // Girl — lower slot
+    const girlY = 1100;
+    const girlSprite = this.add.sprite(cx, girlY, 'player-girl', 0).setScale(SPRITE_SCALE);
+    this.girlLabel = this.add.text(cx, girlY + SPRITE_HALF + 30, 'GIRL', {
+      fontSize: '44px', fontFamily: 'monospace', color: '#888888',
     }).setOrigin(0.5);
 
-    this.add.text(cx, 380, '← → to choose   Z/Space to confirm', {
-      fontSize: '9px', fontFamily: 'monospace', color: '#666688',
+    this.add.text(cx, 1440, '↑ ↓ to choose   Z / Space to confirm', {
+      fontSize: '32px', fontFamily: 'monospace', color: '#666688',
     }).setOrigin(0.5);
 
-    this.statusText = this.add.text(cx, 420, '', {
-      fontSize: '10px', fontFamily: 'monospace', color: '#ff9944',
+    this.statusText = this.add.text(cx, 1540, '', {
+      fontSize: '32px', fontFamily: 'monospace', color: '#ff9944',
     }).setOrigin(0.5);
 
     if (this.input.keyboard) {
-      this.input.keyboard.on('keydown-LEFT', () => this.selectChar('boy'));
-      this.input.keyboard.on('keydown-A', () => this.selectChar('boy'));
-      this.input.keyboard.on('keydown-RIGHT', () => this.selectChar('girl'));
-      this.input.keyboard.on('keydown-D', () => this.selectChar('girl'));
-      this.input.keyboard.on('keydown-Z', () => void this.confirm());
+      this.input.keyboard.on('keydown-UP',    () => this.selectChar('boy'));
+      this.input.keyboard.on('keydown-W',     () => this.selectChar('boy'));
+      this.input.keyboard.on('keydown-DOWN',  () => this.selectChar('girl'));
+      this.input.keyboard.on('keydown-S',     () => this.selectChar('girl'));
+      this.input.keyboard.on('keydown-Z',     () => void this.confirm());
       this.input.keyboard.on('keydown-SPACE', () => void this.confirm());
       this.input.keyboard.on('keydown-ENTER', () => void this.confirm());
     }

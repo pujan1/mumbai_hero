@@ -12,16 +12,18 @@ const nodes: FastTravelNode[] = [
     id: 'train-station',
     label: 'Local Train Station',
     sceneId: 'neighborhood-scene',
-    tileX: 20,
-    tileY: 2,
+    // Road H1, south lane — directly in front of the A1 station building
+    tileX: 3,
+    tileY: 6,
     stubDialogue: 'Trains to other parts of Mumbai coming soon!',
   },
   {
     id: 'bus-stop',
     label: 'BEST Bus Stop',
     sceneId: 'neighborhood-scene',
-    tileX: 3,
-    tileY: 2,
+    // Road H1, south lane — near the B1 block
+    tileX: 13,
+    tileY: 6,
     stubDialogue: 'Bus routes across the city coming soon!',
   },
 ];

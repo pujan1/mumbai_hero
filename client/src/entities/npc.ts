@@ -21,6 +21,10 @@ export class NPC extends Phaser.GameObjects.Sprite {
     this.dialogueTree = dialogueTree;
     scene.add.existing(this);
     this.setOrigin(0.5, 1);
+    // Play the facing-down idle animation if one exists for this sprite key;
+    // falls back to frame 0 silently if the animation hasn't been registered yet.
+    const animKey = `${spriteKey}-idle-down`;
+    if (scene.anims.exists(animKey)) this.play(animKey);
   }
 
   getDialogueTree(): DialogueTree {

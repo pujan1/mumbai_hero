@@ -26,6 +26,12 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   protected interactables: Interactable[] = [];
   private collisionLayer: Phaser.Tilemaps.TilemapLayer | null = null;
   private isTransitioning = false;
+  private lastAutoNpcId: string | null = null;
+  private wasInDialogue = false;
+
+  // Solid tile positions populated by subclasses (e.g. building footprints).
+  // Key format: "col,row". Checked in isColliding() before tilemap layer.
+  protected solidTiles = new Set<string>();
 
   abstract getSceneConfig(): WorldSceneConfig;
   abstract spawnNPCs(): void;
@@ -137,6 +143,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
 
   update(_time: number, delta: number): void {
     if (isDialogueOpen()) {
+      this.wasInDialogue = true;
       if (justPressed('action')) {
         const hudScene = this.scene.get('hud-scene') as unknown as { getDialogueBox: () => import('../ui/dialogue-box.js').DialogueBox };
         hudScene.getDialogueBox().onAdvance();
@@ -144,9 +151,15 @@ export abstract class BaseWorldScene extends Phaser.Scene {
       return;
     }
 
+    // Dialogue just closed → clear lock so player can re-trigger by walking away
+    if (this.wasInDialogue) {
+      this.wasInDialogue = false;
+      this.lastAutoNpcId = null;
+    }
+
     this.player.update(delta, (nx, ny) => this.isColliding(nx, ny));
 
-    // Walk onto a door tile → auto-transition (Pokemon-style, no button needed)
+    // Walk onto a door tile → auto-transition (Pokémon-style, no button needed)
     if (!this.isTransitioning) {
       const door = this.findAutoTriggerAtPlayerTile();
       if (door) {
@@ -156,18 +169,26 @@ export abstract class BaseWorldScene extends Phaser.Scene {
       }
     }
 
+    // Auto-start dialogue when the player is adjacent to and facing an NPC
+    const facingNPC = this.findNearestNPC();
+    if (facingNPC) {
+      if (facingNPC.npcId !== this.lastAutoNpcId) {
+        this.lastAutoNpcId = facingNPC.npcId;
+        void talkToNpc({ npcId: facingNPC.npcId });
+        startDialogue(facingNPC.getDialogueTree(), (callbackId) => {
+          this.handleDialogueCallback(callbackId, facingNPC.npcId);
+        });
+      }
+    } else {
+      // No NPC in facing tile → reset so the same NPC can be triggered again later
+      this.lastAutoNpcId = null;
+    }
+
+    // Action button still needed for non-door interactables (signs, fast-travel, etc.)
     if (justPressed('action')) {
-      const nearest = this.findNearestInteractable() ?? this.findNearestNPC();
-      if (nearest) {
-        if (nearest instanceof NPC) {
-          void talkToNpc({ npcId: nearest.npcId });
-          startDialogue(nearest.getDialogueTree(), (callbackId) => {
-            this.handleDialogueCallback(callbackId, nearest.npcId);
-          });
-        } else if (!nearest.autoTrigger) {
-          // Don't re-fire doors via action button — they're walk-on only
-          nearest.onInteract();
-        }
+      const nearest = this.findNearestInteractable();
+      if (nearest && !nearest.autoTrigger) {
+        nearest.onInteract();
       }
     }
   }
@@ -175,6 +196,15 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   private isColliding(worldX: number, worldY: number): boolean {
     const { x, y, width, height } = this.physics.world.bounds;
     if (worldX < x || worldY < y || worldX >= x + width || worldY >= y + height) return true;
+    const tc = Math.floor(worldX / TILE_SIZE);
+    const tr = Math.floor(worldY / TILE_SIZE);
+    if (this.solidTiles.has(`${tc},${tr}`)) return true;
+    // Block the tile any NPC occupies so the player can't walk through them
+    for (const npc of this.npcs) {
+      const nc = Math.floor(npc.x / TILE_SIZE);
+      const nr = Math.floor((npc.y - TILE_SIZE / 2) / TILE_SIZE);
+      if (tc === nc && tr === nr) return true;
+    }
     if (!this.collisionLayer) return false;
     const tile = this.collisionLayer.getTileAtWorldXY(worldX, worldY);
     return tile !== null && tile.collides;

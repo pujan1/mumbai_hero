@@ -18,20 +18,20 @@ export class StatsHUD extends Phaser.GameObjects.Container {
     const bg = scene.add.rectangle(w / 2, h / 2, w, h, 0x0d0d1a, 0.95);
     bg.setStrokeStyle(1, 0x3a3a6a);
 
-    this.nameTxt = scene.add.text(10, 8, 'Hero', {
-      fontSize: '11px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
+    this.nameTxt = scene.add.text(16, 14, 'Hero', {
+      fontSize: '42px', fontFamily: 'monospace', color: '#ffffff', fontStyle: 'bold',
     });
 
-    this.storylineTxt = scene.add.text(10, 22, 'No path chosen', {
-      fontSize: '9px', fontFamily: 'monospace', color: '#aaaacc',
+    this.storylineTxt = scene.add.text(16, 68, 'No path chosen', {
+      fontSize: '30px', fontFamily: 'monospace', color: '#aaaacc',
     });
 
-    this.moneyTxt = scene.add.text(w - 10, 8, '₹0', {
-      fontSize: '11px', fontFamily: 'monospace', color: '#f5c842', align: 'right',
+    this.moneyTxt = scene.add.text(w - 16, 14, '₹0', {
+      fontSize: '42px', fontFamily: 'monospace', color: '#f5c842', align: 'right',
     }).setOrigin(1, 0);
 
-    this.offlineBanner = scene.add.text(w / 2, h - 10, 'Reconnecting…', {
-      fontSize: '9px', fontFamily: 'monospace', color: '#ff6b6b', align: 'center',
+    this.offlineBanner = scene.add.text(w / 2, h - 12, 'Reconnecting…', {
+      fontSize: '28px', fontFamily: 'monospace', color: '#ff6b6b', align: 'center',
     }).setOrigin(0.5, 1).setVisible(false);
 
     this.add([bg, this.nameTxt, this.storylineTxt, this.moneyTxt, this.offlineBanner]);

@@ -6,14 +6,27 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
+    this.load.spritesheet('player-boy', 'assets/sprites/characters/player-boy.png', {
+      frameWidth: 100,
+      frameHeight: 100,
+    });
+    this.load.spritesheet('player-girl', 'assets/sprites/characters/player-girl.png', {
+      frameWidth: 100,
+      frameHeight: 100,
+    });
+
+    // Elder NPCs: 4 cols × 1 row, each frame 100×100 (facing: down, up, left, right)
+    this.load.spritesheet('npc-elder-bollywood', 'assets/sprites/npcs/npc-elder-bollywood.png', {
+      frameWidth: 100,
+      frameHeight: 100,
+    });
+
     this.createPlaceholderTextures();
   }
 
   private createPlaceholderTextures(): void {
     const textures: { key: string; color: number }[] = [
-      { key: 'player-boy',         color: 0x4488ff },
-      { key: 'player-girl',        color: 0xff44aa },
-      { key: 'npc-elder-bollywood',color: 0xffcc44 },
+      // npc-elder-bollywood is a real spritesheet — loaded above
       { key: 'npc-elder-music',    color: 0xaa44ff },
       { key: 'npc-elder-textile',  color: 0x44ffaa },
       { key: 'npc-elder-fitness',  color: 0xff4444 },
@@ -40,21 +53,54 @@ export class BootScene extends Phaser.Scene {
   }
 
   private createAnimations(): void {
-    const dirs = ['down', 'up', 'left', 'right'];
-    ['player-boy', 'player-girl'].forEach((key) => {
-      dirs.forEach((dir) => {
-        this.anims.create({
-          key: `${key}-walk-${dir}`,
-          frames: [{ key, frame: 0 }],
-          frameRate: 8,
-          repeat: -1,
-        });
-        this.anims.create({
-          key: `${key}-idle-${dir}`,
-          frames: [{ key, frame: 0 }],
-          frameRate: 1,
-          repeat: -1,
-        });
+    const dirs = ['down', 'up', 'left', 'right'] as const;
+
+    // Elder NPC idle animations — 4-frame sheet: col 0=down, 1=up, 2=left, 3=right
+    dirs.forEach((dir, frame) => {
+      this.anims.create({
+        key: `npc-elder-bollywood-idle-${dir}`,
+        frames: [{ key: 'npc-elder-bollywood', frame }],
+        frameRate: 1,
+        repeat: -1,
+      });
+    });
+
+    // Real spritesheet: 5 cols × 4 rows, 100×100 each
+    // Row order: down, up, left, right — col 0 = idle, cols 1–4 = walk
+    dirs.forEach((dir, row) => {
+      const base = row * 5;
+      this.anims.create({
+        key: `player-boy-idle-${dir}`,
+        frames: [{ key: 'player-boy', frame: base }],
+        frameRate: 1,
+        repeat: -1,
+      });
+      this.anims.create({
+        key: `player-boy-walk-${dir}`,
+        frames: this.anims.generateFrameNumbers('player-boy', {
+          frames: [base + 1, base + 2, base + 3, base + 4],
+        }),
+        frameRate: 8,
+        repeat: -1,
+      });
+    });
+
+    // Real spritesheet: same 5 cols × 4 rows layout as player-boy
+    dirs.forEach((dir, row) => {
+      const base = row * 5;
+      this.anims.create({
+        key: `player-girl-idle-${dir}`,
+        frames: [{ key: 'player-girl', frame: base }],
+        frameRate: 1,
+        repeat: -1,
+      });
+      this.anims.create({
+        key: `player-girl-walk-${dir}`,
+        frames: this.anims.generateFrameNumbers('player-girl', {
+          frames: [base + 1, base + 2, base + 3, base + 4],
+        }),
+        frameRate: 8,
+        repeat: -1,
       });
     });
   }

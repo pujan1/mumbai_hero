@@ -1,5 +1,42 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **3×3 neighborhood grid** (`neighborhood-scene.ts`): Completely reworked from a single-road layout to a proper 3×3 block grid with two horizontal roads (H1: rows 5–6, H2: rows 11–12) and two vertical roads (V1: cols 7–8, V2: cols 15–16). Nine distinct building blocks (Train Station, Bollywood+Music, Textile+Fitness, Kholi/Chawl, Park, Food+Cinema, Market, Office, Residential) with correct door positions aligned to road edges.
+- **Building collision** (`base-world-scene.ts`): `solidTiles` set populated per-scene by `addBuildingCollision()` in `neighborhood-scene.ts`. All building footprints are solid; door tiles are excluded so the player can walk through them to trigger transitions.
+- **NPC collision** (`base-world-scene.ts`): `isColliding()` now blocks the tile occupied by any NPC, preventing the player from walking through characters.
+- **Auto-dialogue** (`base-world-scene.ts`): Player automatically starts dialogue when standing adjacent and facing an NPC — no button press needed. `lastAutoNpcId` prevents re-triggering until the player looks away and back. `wasInDialogue` clears the lock when a dialogue session ends.
+- **Bollywood Elder sprite wired** (`boot-scene.ts`): `npc-elder-bollywood.png` (400×100 px, 4 frames) loaded as a real spritesheet; idle animations registered for all four directions; placeholder texture removed.
+- **NPC idle animation auto-play** (`entities/npc.ts`): NPCs automatically play their `<spriteKey>-idle-down` animation on spawn if it is registered.
+- **Asset docs split** (`docs/assets/`): All image-generation prompts extracted from `mumbai-hero-prompt.md` into six focused files:
+  - `01-characters.md` — Player Boy, Player Girl
+  - `02-elder-npcs.md` — 6 Elder NPCs
+  - `03-ambient-npcs.md` — Chai Wallah, Cricket Kid, Laundry Aunty, Vendor, Dog
+  - `04-tilesets.md` — Kholi, Neighborhood, Train Station, House Interior tilesets
+  - `05-vehicles.md` — Mumbai Local Train, BEST Bus
+  - `06-ui.md` — HUD frame, Dialogue box, D-pad, Buttons A/B, Title screen
+- **Asset docs README** (`docs/assets/README.md`): Standards quick reference — tile constants, visual-style boilerplate, sprite-sheet grid conventions, tileset standard, wiring checklist.
+
+### Changed
+
+- **On-screen controls scaled up** (`ui/on-screen-controls.ts`): D-pad arm size 130 px, center-to-center gap 155 px, action button radius 74 px, font 58 px. Directional arrow labels added to D-pad arms. Layout adjusted so controls occupy bottom-left and bottom-right quadrants.
+- **Dialogue box text scaled up** (`ui/dialogue-box.ts`): Speaker text 38 px, body text 32 px, choice text 32 px at 42 px row spacing. Continue-indicator triangle enlarged to 36×24 px. Choice prefix changed to `▶`.
+- **Stats HUD text scaled up** (`ui/stats-hud.ts`): Name 42 px, storyline 30 px, money 42 px, offline banner 28 px.
+- **Fast-travel node positions** (`systems/fast-travel-system.ts`): Train station moved to Road H1 (tileX=3, tileY=6); bus stop moved to Road H1 (tileX=13, tileY=6).
+- **Neighborhood default spawn** (`neighborhood-scene.ts`): Changed from `(3, 8)` (inside a solid building) to `(3, 11)` (Road H2, outside the Kholi door).
+- **`mumbai-hero-prompt.md` trimmed**: Asset generation section (previously ~800 lines) replaced with a two-paragraph visual-modes summary and a link table pointing to `docs/assets/`.
+
+### Fixed
+
+- Player could walk through all buildings in the neighborhood (no collision).
+- Player could walk through NPCs.
+- On-screen controls and HUD text were unreadably small at the ~0.33 display scale factor of the 1200×2600 logical canvas.
+- Bollywood Elder NPC displayed only as a placeholder rectangle; now shows the real sprite.
+
+---
+
 ## [1.0.2] - 2026-04-28
 
 ### Fixed

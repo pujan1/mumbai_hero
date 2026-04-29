@@ -63,7 +63,7 @@ this.load.tilemapTiledJSON('map-my-new', 'assets/maps/my-new-scene.tmj');
 ```
 
 **Tiled export settings:**
-- Tile size: 32×32
+- Tile size: 100×100
 - Map format: JSON (`.tmj`)
 - Embed tilesets: No (reference external tileset files)
 - Layer naming: use `ground`, `collision`, `objects` consistently

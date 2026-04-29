@@ -16,6 +16,7 @@ export class Player extends Phaser.GameObjects.Sprite {
     super(scene, x, y, spriteKey);
     scene.add.existing(this);
     this.setOrigin(0.5, 1);
+    this.setScale(0.5);
     this.setDepth(1);
   }
 
@@ -56,9 +57,9 @@ export class Player extends Phaser.GameObjects.Sprite {
           ease: 'Linear',
         });
       }
-      this.play(`player-walk-${dir}`, true);
+      this.play(`${this.texture.key}-walk-${dir}`, true);
     } else {
-      this.play(`player-idle-${this.facing}`, true);
+      this.play(`${this.texture.key}-idle-${this.facing}`, true);
     }
   }
 

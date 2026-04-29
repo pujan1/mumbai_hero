@@ -1,8 +1,8 @@
-import { BaseWorldScene } from '../base-world-scene.js';
+import { BaseIndoorScene } from '../base-indoor-scene.js';
 import type { WorldSceneConfig } from '../base-world-scene.js';
 import { elderTextileDialogue } from '../../data/dialogues/elder-textile.js';
 
-export class HouseTextileScene extends BaseWorldScene {
+export class HouseTextileScene extends BaseIndoorScene {
   constructor() { super({ key: 'house-textile-scene' }); }
 
   getSceneConfig(): WorldSceneConfig {

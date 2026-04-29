@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { BaseWorldScene } from '../base-world-scene.js';
+import { BaseOutdoorScene } from '../base-outdoor-scene.js';
 import type { WorldSceneConfig } from '../base-world-scene.js';
 import { TILE_SIZE } from '../../config/constants.js';
 import { getFastTravelNodes } from '../../systems/fast-travel-system.js';
@@ -45,7 +45,7 @@ const ambientDialogues: Record<string, DialogueTree> = {
   },
 };
 
-export class NeighborhoodScene extends BaseWorldScene {
+export class NeighborhoodScene extends BaseOutdoorScene {
   constructor() {
     super({ key: 'neighborhood-scene' });
   }

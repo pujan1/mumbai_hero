@@ -1,8 +1,8 @@
-import { BaseWorldScene } from '../base-world-scene.js';
+import { BaseIndoorScene } from '../base-indoor-scene.js';
 import type { WorldSceneConfig } from '../base-world-scene.js';
 import { elderMusicDialogue } from '../../data/dialogues/elder-music.js';
 
-export class HouseMusicScene extends BaseWorldScene {
+export class HouseMusicScene extends BaseIndoorScene {
   constructor() { super({ key: 'house-music-scene' }); }
 
   getSceneConfig(): WorldSceneConfig {

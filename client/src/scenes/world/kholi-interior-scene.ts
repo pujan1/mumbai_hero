@@ -1,4 +1,4 @@
-import { BaseWorldScene } from '../base-world-scene.js';
+import { BaseIndoorScene } from '../base-indoor-scene.js';
 import type { WorldSceneConfig } from '../base-world-scene.js';
 import {
   bedDialogue,
@@ -8,7 +8,7 @@ import {
   kholiDoorDialogue,
 } from '../../data/dialogues/household-objects.js';
 
-export class KholiInteriorScene extends BaseWorldScene {
+export class KholiInteriorScene extends BaseIndoorScene {
   constructor() {
     super({ key: 'kholi-interior-scene' });
   }

@@ -8,6 +8,7 @@ import { startDialogue, isDialogueOpen } from '../systems/dialogue-system.js';
 import { transitionTo } from '../systems/scene-transition-manager.js';
 import { talkToNpc, interactWithObject } from '../services/state-sync.js';
 import { TILE_SIZE, LAYOUT } from '../config/constants.js';
+import { clientGameState } from '../state/game-state.js';
 import type { DialogueTree } from '@mumbai-hero/shared';
 
 export interface WorldSceneConfig {
@@ -29,16 +30,19 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   abstract spawnNPCs(): void;
   abstract spawnInteractables(): void;
 
+  protected abstract buildWorld(): void;
+
   create(data: { spawnPoint?: string }): void {
     const cfg = this.getSceneConfig();
     initInputManager(this);
     this.interactionSystem = new InteractionSystem();
 
-    this.buildPlaceholderWorld();
+    this.buildWorld();
 
     const spawnId = data.spawnPoint ?? 'default';
     const spawnPos = cfg.spawnPoints[spawnId] ?? cfg.spawnPoints['default'] ?? { x: 3, y: 3 };
-    const spriteKey = 'player-boy';
+    const choice = clientGameState.profile?.characterChoice ?? 'boy';
+    const spriteKey = `player-${choice}`;
 
     this.player = new Player(
       this,
@@ -56,30 +60,6 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     this.spawnNPCs();
     this.spawnInteractables();
     this.interactables.forEach((i) => this.interactionSystem.register(i));
-  }
-
-  private buildPlaceholderWorld(): void {
-    const cols = 24;
-    const rows = 18;
-    const totalW = cols * TILE_SIZE;
-    const totalH = rows * TILE_SIZE;
-
-    this.add.rectangle(totalW / 2, totalH / 2, totalW, totalH, 0x335533);
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (r === 0 || r === rows - 1 || c === 0 || c === cols - 1) {
-          this.add.rectangle(
-            c * TILE_SIZE + TILE_SIZE / 2,
-            r * TILE_SIZE + TILE_SIZE / 2,
-            TILE_SIZE, TILE_SIZE, 0x555555,
-          );
-        }
-      }
-    }
-
-    this.physics.world.setBounds(0, 0, totalW, totalH);
-    this.cameras.main.setBounds(0, 0, totalW, totalH);
   }
 
   protected addNPC(

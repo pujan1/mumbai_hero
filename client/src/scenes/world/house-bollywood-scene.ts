@@ -1,8 +1,8 @@
-import { BaseWorldScene } from '../base-world-scene.js';
+import { BaseIndoorScene } from '../base-indoor-scene.js';
 import type { WorldSceneConfig } from '../base-world-scene.js';
 import { elderBollywoodDialogue } from '../../data/dialogues/elder-bollywood.js';
 
-export class HouseBollywoodScene extends BaseWorldScene {
+export class HouseBollywoodScene extends BaseIndoorScene {
   constructor() { super({ key: 'house-bollywood-scene' }); }
 
   getSceneConfig(): WorldSceneConfig {

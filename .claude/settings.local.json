@@ -4,7 +4,10 @@
       "Bash(npm install *)",
       "Bash(timeout 8 npx tsx server/src/main.ts)",
       "Bash(npx tsc *)",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(grep -n \"## Notes for the Implementing Agent\\\\|^---$\" /Users/pujan/Desktop/project/mumbai_hero/mumbai-hero-prompt.md)",
+      "Bash(git -C /Users/pujan/Desktop/project/mumbai_hero log --oneline -5)",
+      "Bash(git -C /Users/pujan/Desktop/project/mumbai_hero show 5885d47 --stat)"
     ]
   }
 }

@@ -441,67 +441,324 @@ Every file in `docs/` must be written before the project is considered done. Spe
 
 ## Asset Generation Prompts
 
-Use these prompts with an image generation model (Midjourney, DALL-E, Stable Diffusion, etc.) to produce the final art. Maintain a consistent style across every asset. The shared style descriptor below should be **prepended to every prompt**.
+Use these prompts with an image generation model (Midjourney, DALL-E, Stable Diffusion, etc.) to produce the final art. Each prompt is **self-contained** — the style descriptor is already embedded. Copy the prompt verbatim.
 
-### Shared Style Descriptor (prepend to all prompts)
+### Critical constraints that apply to every asset
 
-> *"16-bit pixel art, top-down JRPG style, classic Game Boy Advance era aesthetic, vibrant saturated palette, clean black outlines, 32×32 pixel tile grid, no anti-aliasing, sharp pixels, transparent background where applicable."*
+- **No anti-aliasing.** Every pixel must be a single solid color — no sub-pixel blending, no smooth color transitions between edges.
+- **Hard 1-pixel black outlines** around all characters, objects, and UI panels.
+- **Transparent PNG background** for all sprites and UI overlays (except the title screen, which is fully opaque).
+- **Maximum color counts** are listed per asset — stay within them so palettes stay cohesive.
+- **No glow effects, drop shadows, gradients, or post-processing filters.**
+- All **dimensions listed are exact output PNG file sizes** — do not add padding, margins, or canvas overflow.
 
-### Character Sprites
+---
 
-1. **Player — Boy (18 yrs, Mumbai):** *[shared style]* + "Indian teenage boy, 18 years old, lean build, short black hair, wearing a simple blue T-shirt, dark jeans, and worn sneakers. Top-down character sprite sheet: 4 directions (up, down, left, right), each direction with 4-frame walk cycle and 1 idle frame. 32×32 px per frame. Friendly, expressive face."
+### A — Player Character Sprite Sheets
 
-2. **Player — Girl (18 yrs, Mumbai):** *[shared style]* + "Indian teenage girl, 18 years old, slim build, long black hair in a loose ponytail, wearing a yellow kurti top, dark leggings, and sandals. Top-down character sprite sheet: 4 directions, 4-frame walk cycle and 1 idle frame per direction. 32×32 px per frame. Friendly, expressive face."
+Both player characters share the same sprite sheet grid:
 
-3. **Bollywood Elder NPC:** *[shared style]* + "Charismatic Indian man in his 60s, salt-and-pepper hair, neatly trimmed beard, wearing a cream-colored kurta with a maroon shawl, gold-rimmed glasses, holds a rolled-up film script. Top-down sprite, 4 directions, 1 idle frame each, 32×32 px."
+```
+Output PNG:  160 × 128 px
+Grid:        5 columns × 4 rows, each cell 32×32 px (20 cells total)
 
-4. **Playback Singer Elder NPC:** *[shared style]* + "Elegant Indian woman in her 60s, long grey hair tied back, wearing a deep purple sari with silver embroidery, a tanpura instrument beside her. Top-down sprite, 4 directions, 1 idle frame each, 32×32 px."
+Row 0 (y=0):   facing DOWN  — col 0: idle | cols 1–4: walk frames 1–4
+Row 1 (y=32):  facing UP    — col 0: idle | cols 1–4: walk frames 1–4
+Row 2 (y=64):  facing LEFT  — col 0: idle | cols 1–4: walk frames 1–4
+Row 3 (y=96):  facing RIGHT — col 0: idle | cols 1–4: walk frames 1–4
+```
 
-5. **Textile Elder NPC:** *[shared style]* + "Indian man in his late 50s, balding with grey side hair, wearing a measuring tape around his neck, white half-sleeve shirt and brown trousers, holds shears. Top-down sprite, 4 directions, 1 idle frame each, 32×32 px."
+Walk cycle: legs alternate left-right across frames 1→4. Idle: both feet together, arms at sides.  
+Top-down foreshortening: body occupies bottom 22 px of each 32×32 cell; head/hair occupies top 10 px.  
+All 20 cells must be filled. No blank cells.
 
-6. **Fitness Elder NPC:** *[shared style]* + "Muscular Indian man in his 50s, shaved head, thick moustache, wearing a sleeveless red gym vest and grey track pants, towel over shoulder. Top-down sprite, 4 directions, 1 idle frame each, 32×32 px."
+Phaser loads these as: `this.load.spritesheet('player-boy', '...player-boy.png', { frameWidth: 32, frameHeight: 32 })`
 
-7. **Food Elder NPC:** *[shared style]* + "Stout cheerful Indian man in his 60s, white moustache, wearing a white cook's shirt, checked lungi, and a small white cap, holds a steel ladle. Top-down sprite, 4 directions, 1 idle frame each, 32×32 px."
+**A1 — Player Boy** → save as `sprites/characters/player-boy.png`
 
-8. **Cinematographer Elder NPC:** *[shared style]* + "Indian woman in her 50s, short bobbed grey-streaked hair, wearing a black t-shirt, khaki cargo pants, vintage film camera around her neck. Top-down sprite, 4 directions, 1 idle frame each, 32×32 px."
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant saturated palette, 1-pixel black outlines on all edges, strictly no anti-aliasing, hard pixel edges, transparent PNG background. Output: exactly 160×128 px PNG. Sprite sheet grid: 5 columns × 4 rows, each cell 32×32 px. Row order top-to-bottom: facing-down (row 0), facing-up (row 1), facing-left (row 2), facing-right (row 3). Column order left-to-right: idle (col 0), walk-frame-1 (col 1), walk-frame-2 (col 2), walk-frame-3 (col 3), walk-frame-4 (col 4). All 20 cells filled — no empty cells. Character: Indian teenage boy, 18 years old, lean build. Top-down foreshortening — body occupies bottom 22 px of each 32×32 cell, head occupies top 10 px. Short straight black hair (#1A1A1A). Warm brown skin (#8B5A2B). Outfit: plain sky-blue T-shirt (#5B9BD5), dark navy jeans (#1A2744), worn grey sneakers (#9B9B9B). Facing-down idle (col 0, row 0): front-facing face, small friendly expression — two black dot eyes (2×2 px each), tiny 4-px-wide smile. Walk frames (cols 1–4): left and right foot alternate beneath the torso across the 4 frames — frame 1: left foot forward; frame 2: both feet center; frame 3: right foot forward; frame 4: both feet center (mirror of frame 2). Facing-up rows: back of head visible (black hair shape, no face). Facing-left/-right: side profile with one eye visible. Maximum 24 colors total across the entire 160×128 sheet."
 
-9. **Ambient NPC — Chai-wallah:** *[shared style]* + "Young Indian man, mid-20s, simple white vest and rolled-up trousers, holding a kettle and small glasses, standing behind a small chai stall. Top-down sprite, 4 directions, 1 idle frame each, 32×32 px."
+**A2 — Player Girl** → save as `sprites/characters/player-girl.png`
 
-10. **Ambient NPC — Cricket kid:** *[shared style]* + "Indian boy, around 10 years old, blue school shorts and white shirt, holding a cricket bat. Top-down sprite, 4 directions, 1 idle frame each, 32×32 px."
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant saturated palette, 1-pixel black outlines, strictly no anti-aliasing, hard pixel edges, transparent PNG background. Output: exactly 160×128 px PNG. Sprite sheet grid: 5 columns × 4 rows, each cell 32×32 px. Row order: facing-down (row 0), facing-up (row 1), facing-left (row 2), facing-right (row 3). Column order: idle (col 0), walk-frame-1 through walk-frame-4 (cols 1–4). All 20 cells filled. Character: Indian teenage girl, 18 years old, slim build. Top-down foreshortening — body occupies bottom 22 px, head occupies top 10 px. Long straight black hair (#1A1A1A) tied in a low loose ponytail — from above, hair appears as a dark oval shape at the top of the head with a thin tail extending slightly south. Warm brown skin (#8B5A2B). Outfit: mustard-yellow kurti top (#D4A017) hanging to mid-thigh (fills most of the body area), dark grey leggings (#333333) visible below the kurti hem, flat brown sandals (#A0522D). Facing-down idle: simple friendly face — two black dot eyes (2×2 px), gentle 4-px-wide smile. Walk frames: feet alternate beneath the kurti just as the boy sprite, but the swinging leg is darker grey (legging) below a yellow hem. Facing-up rows: only the hair ponytail shape visible at top, no face. Maximum 24 colors across the entire sheet."
 
-11. **Ambient NPC — Laundry aunty:** *[shared style]* + "Middle-aged Indian woman, hair in a bun, wearing a green sari, holding a damp piece of cloth. Top-down sprite, 4 directions, 1 idle frame each, 32×32 px."
+---
 
-12. **Ambient NPC — Vegetable vendor:** *[shared style]* + "Indian man, 40s, weathered face, wearing a beige shirt and dhoti, sitting cross-legged behind a basket of tomatoes and onions. Top-down sprite, idle only (he doesn't move), 1 frame, 32×32 px."
+### B — Elder NPC Sprite Sheets (stationary, idle only)
 
-13. **Ambient NPC — Stray dog:** *[shared style]* + "Friendly Indian street dog (Indie dog), tan and white fur, floppy ears, wagging tail. Top-down sprite, 4 directions, 2-frame walk cycle, 32×32 px."
+Elders never walk. They stand in their house facing the player. Sheet layout for all 6 elders:
 
-### Tilesets
+```
+Output PNG:  128 × 32 px
+Grid:        4 columns × 1 row, each cell 32×32 px (4 cells total)
 
-14. **Kholi interior tileset:** *[shared style]* + "Top-down tileset for a small Mumbai kholi (one-room dwelling): worn cement floor, faded blue walls, a single bed with a printed bedsheet, small wooden table, a 2-burner gas stove, a steel utensil rack, a wall-mounted fan, a small mirror, a framed family photo, a wooden door, a single window with a metal grill, faded religious calendar on wall. 32×32 px tile grid, includes wall tiles, floor tiles, and decorative object tiles. Modular and tileable."
+Col 0 (x=0):   facing DOWN  (toward player arriving from south door — most-used frame)
+Col 1 (x=32):  facing UP
+Col 2 (x=64):  facing LEFT
+Col 3 (x=96):  facing RIGHT
+```
 
-15. **Mumbai chawl/neighborhood exterior tileset:** *[shared style]* + "Top-down tileset for a dense Mumbai chawl neighborhood: cracked grey pavement, narrow alleys, multi-story chawl building facades with wooden balconies and hanging laundry, electric poles with tangled wires, plastic water tanks on rooftops, a small temple corner, potted tulsi plants, blue plastic tarps, painted wall advertisements, a few BEST-blue painted railings. 32×32 px grid, modular, tileable."
+Body proportions identical to player sprites (bottom 22 px = body/torso, top 10 px = head).  
+All 4 cells must be filled. No blank cells.
 
-16. **Train station tileset:** *[shared style]* + "Top-down tileset for a Mumbai suburban local train station: yellow ochre platform tiles, blue station signage, metal pillars, wooden benches, a foot-overbridge entrance, train tracks with sleepers, an idle Mumbai local train (orange and blue livery) on the tracks. 32×32 px grid."
+Phaser loads as: `this.load.spritesheet('npc-elder-bollywood', '...', { frameWidth: 32, frameHeight: 32 })`
 
-17. **Elder house interior tileset (generic + 6 themed variants):** *[shared style]* + "Top-down interior tileset for a slightly nicer Mumbai house than a kholi: wooden floor, painted walls, a sofa, a wooden desk. Then provide 6 themed decoration packs to drop on top: (a) Bollywood — film posters, an old film projector, awards on a shelf; (b) Music — harmonium, tanpura, framed concert photos; (c) Textile — mannequins, fabric rolls, a sewing machine; (d) Fitness — dumbbells, a yoga mat, a punching bag, a wall mirror; (e) Food — a small kitchen counter, hanging copper pots, spice jars; (f) Cinema — vintage cameras on shelves, lighting umbrellas, framed black-and-white photos. 32×32 px grid."
+**B1 — Bollywood Elder** → save as `sprites/npcs/npc-elder-bollywood.png`
 
-### Vehicle / Animated Props
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 128×32 px PNG. Grid: 4 columns × 1 row, each cell 32×32 px. Column order left-to-right: facing-down (col 0), facing-up (col 1), facing-left (col 2), facing-right (col 3). Idle pose only — no walk frames. All 4 cells filled. Character: charismatic Indian man, early 60s, heavyset frame. Top-down view — head occupies top 10 px, body bottom 22 px of each 32×32 cell. Short salt-and-pepper hair (#808080 streaks on #1A1A1A base) visible from above as a rounded dark shape with grey highlights. Warm brown skin (#7A4A28). In facing-down cell: neatly trimmed beard visible as a dark patch (#2A1A0A) along jaw line. Gold-rimmed circular glasses (#FFD700 2-px rings) on face. Cream-colored kurta (#F5F0DC) forms the torso fill. Maroon shawl (#8B0000) draped from left shoulder — visible from above as a diagonal darker band running from upper-left toward lower-right of the torso. Holding a small rolled white scroll (film script) in the right hand — a 2×6 px white rectangle with black outline. In facing-up cell: back of head, no face detail, shawl band visible on shoulders. Left/right cells: side profile, one eye/glass ring visible. Maximum 20 colors."
 
-18. **Mumbai local train (animated):** *[shared style]* + "Side-view (or 3/4 top-down) sprite of a Mumbai suburban local train, orange and blue livery, 3 carriages, 4-frame loop of it passing through frame. 32×32 px tiles, total sprite ~96×32 per frame."
+**B2 — Playback Singer Elder** → save as `sprites/npcs/npc-elder-music.png`
 
-19. **BEST bus (animated):** *[shared style]* + "Top-down sprite of a Mumbai BEST bus, red double-decker, 4-frame loop pulling up to a bus stop. ~64×32 px per frame."
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 128×32 px PNG. Grid: 4 columns × 1 row, each cell 32×32 px. Column order: facing-down, facing-up, facing-left, facing-right. Idle only. All 4 cells filled. Character: elegant Indian woman, early 60s, slim build. Top-down foreshortening — head (10 px) and body (22 px). Silver-grey hair (#C0C0C0) tied in a tight bun — from above appears as a round light-grey circle at top of head, no stray hairs. Warm brown skin (#7A4A28). Deep purple sari (#4B0082) with a thin silver embroidery border (#C0C0C0, 2 px stripe) along lower wrap edge — the sari fills the entire torso area in purple with a lighter stripe at one edge. In facing-down cell: serene expression, eyes depicted as two thin horizontal lines (meditative half-closed), gentle closed-mouth expression. In facing-up cell: only the bun shape visible. Maximum 20 colors."
 
-### UI Elements
+**B3 — Textile Elder** → save as `sprites/npcs/npc-elder-textile.png`
 
-20. **Stats HUD frame:** *[shared style]* + "A pixel-art UI panel for a JRPG stats bar: stylized brass and dark wood frame, with slots for player portrait, name, current career stage, and coin counter. Designed to span the full width of a portrait phone screen. Approximately 360×128 px."
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 128×32 px PNG. Grid: 4 columns × 1 row, each cell 32×32 px. Column order: facing-down, facing-up, facing-left, facing-right. Idle only. All 4 cells filled. Character: Indian man, late 50s, stocky build. Balding head visible from above as a tan skin-colored oval (#7A4A28) with only a thin ring of short grey hair (#A0A0A0) around the sides and back. Warm brown skin. Wearing a plain white half-sleeve shirt (#F0F0F0) — white torso fill, sleeve edges visible as thin white extensions at the sides. Brown trousers (#6B3A2A) fill the lower body. Yellow measuring tape (#FFD700) draped around neck — visible from above as a small looping thin yellow line across the upper torso in the facing-down cell. Holding fabric shears in right hand (facing-down cell) — a small X-shaped silver (#C0C0C0) cross of pixels, 4×6 px. Maximum 20 colors."
 
-21. **Dialogue box:** *[shared style]* + "A pixel-art dialogue text box: cream parchment background, dark brown rounded border, small triangle 'continue' indicator in the bottom-right. Designed to span the full width of a portrait phone screen. Approximately 360×96 px."
+**B4 — Fitness Elder** → save as `sprites/npcs/npc-elder-fitness.png`
 
-22. **On-screen D-pad:** *[shared style]* + "Translucent pixel-art D-pad for touch controls: dark brass cross with embossed directional arrows. Approximately 128×128 px."
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 128×32 px PNG. Grid: 4 columns × 1 row, each cell 32×32 px. Column order: facing-down, facing-up, facing-left, facing-right. Idle only. All 4 cells filled. Character: Indian man, early 50s, very muscular — the broadest character in the cast, shoulders should almost span the full 30 px usable width of the cell. Shaved head (brown skin #7A4A28 visible all the way to edge of head). Thick black moustache (#1A1A1A) shown as two short horizontal 4-px strokes on either side of the nose in facing-down cell. Sleeveless bright red gym vest (#CC0000) — the wide torso appears as a solid red mass with skin-colored shoulder/arm sides visible. Grey track pants (#888888) fill the lower body. A thin white towel strip (#F0F0F0) draped over the left shoulder — a 2×8 px white strip hanging diagonally. Maximum 20 colors."
 
-23. **A and B action buttons:** *[shared style]* + "Two translucent pixel-art circular buttons for touch controls, labeled 'A' (red) and 'B' (blue), embossed pixel-art style. ~64×64 px each."
+**B5 — Food Elder** → save as `sprites/npcs/npc-elder-food.png`
 
-24. **Title screen background:** *[shared style]* + "A vertical (portrait) pixel-art splash illustration of the Mumbai skyline at sunset: silhouette of chawls, water tanks, satellite dishes, the Gateway of India in the distance, an orange-pink sky with the title 'MUMBAI HERO' in chunky pixel-art letters. 360×640 px."
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 128×32 px PNG. Grid: 4 columns × 1 row, each cell 32×32 px. Column order: facing-down, facing-up, facing-left, facing-right. Idle only. All 4 cells filled. Character: Indian man, early 60s, stout rotund build — the torso is wide and rounded. Small white chef's cap (#FFFFFF) on head — from above appears as a white rounded-rectangle shape (10×6 px) sitting atop the head. White moustache (#F5F5F5) visible as a small 4-px white patch below nose (facing-down cell). White cook's shirt (#F5F5F5) — torso is mostly white. Checked red-and-white lungi (#CC0000 and #FFFFFF alternating 2-px squares) fills lower body. Holding a silver steel ladle in right hand — a small T-shaped silver (#C0C0C0) cluster of pixels (3×5 px total). Maximum 20 colors."
+
+**B6 — Cinematographer Elder** → save as `sprites/npcs/npc-elder-cinema.png`
+
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 128×32 px PNG. Grid: 4 columns × 1 row, each cell 32×32 px. Column order: facing-down, facing-up, facing-left, facing-right. Idle only. All 4 cells filled. Character: Indian woman, early 50s, lean build. Short bobbed hair — from above appears as a dark shape (#1A1A1A) with grey-white streaks on the sides (#DCDCDC highlights at the edges of the hair mass). Warm brown skin (#7A4A28). Plain black T-shirt (#1A1A1A) — torso is nearly all black. Khaki/olive cargo pants (#8B8C5A) fill the lower body. A vintage film camera (#4A4A4A body, 8×6 px rectangle with a tiny brass circular lens #D4A017 at center) hanging at chest level from a neck strap — visible in facing-down cell as a small dark rectangle on the torso. Maximum 20 colors."
+
+---
+
+### C — Ambient NPC Sprite Sheets (walking)
+
+Walking ambient NPCs use the full 5-frame layout. Sheet: **160×128 px** (same grid as the player sprites — 5 cols × 4 rows, 32×32 per cell, all 20 cells filled).
+
+**C1 — Chai-wallah** → save as `sprites/npcs/npc-chai-wallah.png`
+
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 160×128 px PNG. Grid: 5 columns × 4 rows, each cell 32×32 px, all 20 cells filled. Row order: facing-down (row 0), facing-up (row 1), facing-left (row 2), facing-right (row 3). Column order: idle (col 0), walk-frame-1 through walk-frame-4 (cols 1–4). Top-down foreshortening: head occupies top 10 px, body bottom 22 px. Character: young Indian man, mid-20s, lean. Short black hair (#1A1A1A). Warm brown skin (#8B5A2B). Plain white vest/banyan (#F5F5F5) for torso. Beige rolled-up trousers (#D2B48C) for lower body. In idle and facing-down cells: right hand holds a dark brown tin kettle (#5C4033) — a 5×6 px teardrop shape; left hand holds a tiny off-white small glass (#F0F0F0, 2×3 px white rectangle). Walk frames: legs alternate, kettle stays in right hand. Maximum 22 colors."
+
+**C2 — Cricket kid** → save as `sprites/npcs/npc-cricket-kid.png`
+
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 160×128 px PNG. Grid: 5 columns × 4 rows, each cell 32×32 px, all 20 cells filled. Row order: facing-down, facing-up, facing-left, facing-right. Column order: idle, walk-frames 1–4. Character: Indian boy ~10 years old. Noticeably shorter than adult NPCs — head occupies top 8 px, body occupies 16 px, with 8 px of empty (transparent) space at the bottom of each cell. Short black hair (#1A1A1A). Warm brown skin (#8B5A2B). Royal blue school shorts (#0047AB) for lower body. White school shirt (#F5F5F5) for torso. Idle and facing-down cells: holding a light tan cricket bat (#C8A96E) in right hand — a thin vertical rectangle 2×14 px beside the body. Walk frames: legs alternate, bat held in right hand swings slightly. Maximum 22 colors."
+
+**C3 — Laundry aunty** → save as `sprites/npcs/npc-laundry-aunty.png`
+
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 160×128 px PNG. Grid: 5 columns × 4 rows, each cell 32×32 px, all 20 cells filled. Row order: facing-down, facing-up, facing-left, facing-right. Column order: idle, walk-frames 1–4. Top-down foreshortening: head 10 px, body 22 px. Character: middle-aged Indian woman, slightly plump — body wider than the lean characters. Hair in a tight bun — from above, a round dark circle (#1A1A1A, 10 px diameter) at the top of the head. Warm brown skin (#7A4A28). Forest-green sari (#228B22) with a 2-px golden-yellow border stripe (#DAA520) along the bottom hem. Idle and facing-down cells: a pale-blue damp cloth (#B0C4DE) draped across both arms — shown as a wide soft-blue horizontal band (24×6 px) across the sprite's midriff. Walk frames: cloth shifts slightly but remains draped. Maximum 22 colors."
+
+---
+
+### D — Stationary ambient NPC (single frame)
+
+**D1 — Vegetable vendor** → save as `sprites/npcs/npc-vendor.png`
+
+```
+Output PNG:  32 × 32 px  — single frame, no animation
+```
+
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 32×32 px PNG, single frame, no animation. Character: Indian man ~40s, sitting cross-legged on the ground. He is compact — his seated body occupies approximately the top-left 18×16 px of the 32×32 cell. Beige kurta shirt (#D2B48C). White dhoti (#F5F5F5) folds visible beneath. Warm brown skin (#7A4A28). In front of and slightly south of him: a wicker basket depicted as a flat oval brown shape (#8B6914, roughly 14×8 px) with contents: 3 bright-red tomato dots (#CC2200, 3×3 px each) and 2 creamy-white onion dots (#D4C27A, 4×4 px each) arranged inside the oval. Total scene fits within 32×32 px. Maximum 18 colors."
+
+---
+
+### E — Stray Dog
+
+The dog has a shorter walk cycle: idle + 2 walk frames per direction.
+
+```
+Output PNG:  96 × 128 px
+Grid:        3 columns × 4 rows, each cell 32×32 px (12 cells total)
+
+Col 0: idle (standing, tail up)
+Col 1: walk-frame-1 (left two legs stepped forward)
+Col 2: walk-frame-2 (right two legs stepped forward)
+
+Row 0: facing DOWN
+Row 1: facing UP
+Row 2: facing LEFT
+Row 3: facing RIGHT
+```
+
+All 12 cells must be filled.
+
+Phaser loads as: `this.load.spritesheet('npc-dog', '...', { frameWidth: 32, frameHeight: 32 })`
+
+**E1 — Stray dog** → save as `sprites/npcs/npc-dog.png`
+
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 96×128 px PNG. Grid: 3 columns × 4 rows, each cell 32×32 px, all 12 cells filled. Column order: idle (col 0), walk-frame-1 (col 1), walk-frame-2 (col 2). Row order: facing-down (row 0), facing-up (row 1), facing-left (row 2), facing-right (row 3). Character: friendly Indian street dog (INDog), quadruped. Top-down view — the dog appears as an oval body mass (~24×18 px) centered in each 32×32 cell, with 4 stubby legs at the corners (each leg a 4×4 px dark nub). Tan fur (#C19A6B) body with an off-white chest/belly patch (#F0F0F0) as a lighter oval in the center of the body. Floppy ears (#8B6914, darker than body): two small dark triangular shapes flanking the head, drooping outward. Small black nose dot (2×2 px #1A1A1A) at the southern edge of the head in facing-down cell. In idle frames: short upright tail — a thin 2×6 px stick extending from the rear, angled at 30°. Walk frames: alternate pairs of legs (col 1: front-left + rear-right legs extended; col 2: front-right + rear-left legs extended). Maximum 16 colors."
+
+---
+
+### F — Tilesets
+
+All tilesets: PNG, transparent background, 32×32 px per tile. Each tile must seamlessly tile with adjacent same-type tiles. Sheet width is 512 px (16 tiles per row) for all tilesets below.
+
+**F1 — Kholi Interior Tileset** → save as `tilesets/tileset-kholi.png`
+
+```
+Output PNG:  512 × 192 px  (16 columns × 6 rows, 96 tile slots, each tile 32×32 px)
+```
+
+Tile layout — left-to-right, top-to-bottom:
+
+```
+Row 0 — Floor & wall bases (tiles 0–15):
+  0:  Plain worn cement floor — mid-grey #A8A8A8, subtle diagonal hairline crack, fully tileable
+  1:  Floor variant — slightly darker #909090 with a horizontal crack
+  2:  Floor variant — chip mark in one corner, same grey base
+  3:  Solid wall — faded powder-blue #8AABCC painted plaster, flat, tileable
+  4:  Wall with stain — same blue wall with a horizontal brownish water-mark stripe
+  5:  Wall–floor junction — wall blue on top 16 px, dark shadow strip 4 px, floor grey on bottom 12 px
+  6:  Corner junction (top-left) — blue wall on top and left edges meeting at corner
+  7:  Corner junction (top-right) — blue wall meeting at right corner
+  8:  Open doorway — floor tile showing a passage gap (no door leaf, just floor through)
+  9:  Window (in wall) — barred metal grill #808080 set in blue wall, exterior light #FFFACD beyond
+  10: Closed door — worn wood #6B3A2A with two raised rectangular panels, dark gap at base
+  11: Open door — same door swung 90° (door leaf visible to one side)
+  12–15: Transparent (reserved)
+
+Row 1 — Furniture top-halves (tiles 16–31):
+  16: Bed top-half — metal headboard #808080, light-blue printed bedsheet #6699CC
+  17: Bed top-half variant — same headboard, orange-floral sheet #E67E22
+  18: Small wooden table top — dark brown surface #4A2C0A with a steel cup (silver circle) on it
+  19: 2-burner gas stove top — grey metal body #666666, two silver burner rings #C0C0C0
+  20: Wall-mounted utensil rack (upper) — rack rail with 3 hanging steel vessels (silver ovals)
+  21: Wall-mounted fan — off-white circular fan body, 3 dark blades, mounted on blue wall
+  22: Oval mirror — silver frame #C0C0C0, light-blue interior with small white highlight glint
+  23: Framed family photo — small warm sepia #C8A87A rectangle in a dark wood frame on wall
+  24: Religious calendar — small white paper page with a red border, on wall
+  25: LPG gas cylinder — small red cylinder #CC0000 (8×18 px) leaning against wall corner
+  26–31: Transparent (reserved)
+
+Row 2 — Furniture bottom-halves (tiles 32–47):
+  32: Bed bottom-half — foot of bed, bedsheet fold, small pillow visible
+  33: Bed bottom-half variant — matching orange-floral sheet foot
+  34: Table bottom-half — dark brown legs #4A2C0A
+  35: Gas stove bottom-half — stove base sitting on floor
+  36: Utensil rack bottom-half — lower shelf with 2 stacked steel plates
+  37–47: Transparent (reserved)
+
+Rows 3–5: All transparent (reserved for future expansion)
+```
+
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 512×192 px PNG. Tile grid: 16 columns × 6 rows, each tile 32×32 px. Tiles arranged exactly as follows — Row 0 (floor and wall bases, tiles 0–11 then 4 transparent): tile 0: plain worn cement floor mid-grey #A8A8A8 with a diagonal hairline crack fully tileable; tile 1: floor variant darker #909090 with horizontal crack; tile 2: floor variant with corner chip; tile 3: faded powder-blue #8AABCC plaster wall fully tileable; tile 4: same blue wall with brownish horizontal watermark stripe; tile 5: wall-floor junction (blue wall top 16px, 4px dark shadow strip, grey floor bottom 12px); tile 6: top-left wall corner junction; tile 7: top-right wall corner junction; tile 8: open doorway (floor tile, no door); tile 9: barred window in blue wall (metal grill #808080, pale yellow exterior light #FFFACD); tile 10: closed wooden door #6B3A2A with raised panels; tile 11: open door (door swung open); tiles 12–15: transparent. Row 1 (furniture top-halves, tiles 16–25 then 6 transparent): tile 16: single bed top-half with grey metal headboard #808080 and light-blue bedsheet #6699CC; tile 17: bed top alternate with orange-floral sheet #E67E22; tile 18: small wooden table top #4A2C0A with steel cup; tile 19: 2-burner gas stove top with silver burner rings; tile 20: wall-mounted utensil rack upper shelf with hanging steel vessels; tile 21: wall-mounted off-white fan with 3 dark blades; tile 22: oval mirror with silver frame and light-blue reflective interior; tile 23: small framed sepia family photo #C8A87A in dark wood frame; tile 24: small religious calendar page, white with red border; tile 25: small red LPG gas cylinder #CC0000 leaning in corner; tiles 26–31: transparent. Row 2 (furniture bottom-halves, tiles 32–36 then 11 transparent): tile 32: bed foot with sheet fold; tile 33: bed foot floral variant; tile 34: table legs #4A2C0A; tile 35: stove base on floor; tile 36: utensil rack lower shelf with stacked plates; tiles 37–47: transparent. Rows 3–5: fully transparent. All floor tiles seamlessly tileable. Maximum 32 colors total across entire sheet. Palette: cool-grey concrete, aged blue-grey walls, warm dark-brown furniture, off-white #F0EEE0 as brightest highlight."
+
+---
+
+**F2 — Neighborhood Exterior Tileset** → save as `tilesets/tileset-neighborhood.png`
+
+```
+Output PNG:  512 × 256 px  (16 columns × 8 rows, 128 tile slots, each tile 32×32 px)
+```
+
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 512×256 px PNG. Grid: 16 columns × 8 rows, each tile 32×32 px, 128 total slots. Tiles arranged left-to-right, top-to-bottom: Row 0 — ground tiles: (0) cracked grey pavement #B0B0B0 seamlessly tileable; (1) pavement variant with diagonal tar patch #555555; (2) narrow alley floor darker grey #888888; (3) dusty dirt path tan #C8B89A; (4) pavement edge with gutter shadow on one side; (5) pavement T-junction crack; (6) pavement crossroads crack mark; (7) pavement corner piece; (8–15) transparent. Row 1 — building facade exterior tiles: (16) chawl facade wall — cream-ochre #D4B896 plaster, flat tileable; (17) facade with small wooden window frame (dark brown rectangle in cream wall); (18) facade with balcony overhang edge (a shadow strip along the tile bottom); (19) facade corner tile; (20) electric pole base — dark concrete post #606060 centered in a ground tile; (21) electric pole top — pole tip with 3 wire connection dots; (22) plastic blue water tank on rooftop — blue rectangle #1A5276 on grey roof; (23) plastic water tank shadow tile; (24) small temple corner — orange shrine flag #FF8C00 on a tiny whitewashed corner structure; (25) potted tulsi plant — terracotta pot #CC6633 with bright green tulsi leaves #228B22; (26) faded painted wall advertisement — red lettering #CC2200 on cream wall; (27) BEST-blue painted railing #005F9E horizontal bar; (28) blue plastic tarp #2E86AB draped at edge; (29) corrugated iron roofing tile — diagonal silver-grey lines on grey; (30–31) transparent. Row 2 — house exterior entrance tiles for all 6 elder houses plus locked houses: (32) Bollywood house door — tall doorway with a red-and-yellow film poster (#CC2200 and #FFD700) on the wall beside it; (33) Music house door — small painted music notes (#1A1A1A) above doorway; (34) Textile house exterior — a tailor's dress mannequin (#D2B48C torso form on grey pole) standing beside door; (35) Fitness house door — tiny dumbbell shape painted on door; (36) Food house door — steel thali circle painted on wall; (37) Cinema house door — vintage box camera shape painted beside door; (38) Locked house door — plain door with a padlock symbol; (39) NPC standing spot — pavement tile with a faint grey shadow circle (12 px diameter) where vendor sits; (40–47) transparent. Rows 3–7: fully transparent (reserved). All pavement and wall tiles seamlessly tileable. Maximum 48 colors total. Palette: warm ochres and creams for buildings, grey concrete for ground, bright accent colors for signage."
+
+---
+
+**F3 — Train Station Tileset** → save as `tilesets/tileset-train.png`
+
+```
+Output PNG:  512 × 128 px  (16 columns × 4 rows, 64 tile slots, each tile 32×32 px)
+```
+
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 512×128 px PNG. Grid: 16 columns × 4 rows, each tile 32×32 px. Row 0 — platform surface tiles: (0) platform floor — warm yellow-ochre #D4A843 smooth tiles, seamlessly tileable; (1) platform edge tile — same ochre with black-and-yellow #FFD700 caution stripe (4 px wide) along the south edge; (2) platform edge corner tile; (3) platform with painted white center line (2 px wide); (4) bench top-down — dark brown plank #4A2C0A seat occupying the top 16 px of tile, legs implied by shadows; (5) metal pillar top-down — grey circle #808080 (12 px diameter) on ochre platform; (6) blue station name sign board — teal-blue #006994 rectangle (28×12 px) with white horizontal text-placeholder bar; (7–15) transparent. Row 1 — track tiles: (16) train track — two parallel dark steel rails (#444444, 3 px wide each, 8 px apart) on grey concrete sleepers #A0A0A0, seamlessly tileable horizontally; (17) track variant — sleeper offset; (18) track buffer end tile — a red buffer stop #CC0000 at end of rails; (19) foot-overbridge floor tile — concrete grey #909090 with railing shadow strips along both sides; (20) overbridge railing tile — a blue painted railing bar; (21–31) transparent. Row 2 — train carriage roof tiles (top-down view of train from above, placed on map to represent train on tracks): (32) train carriage roof center tile — flat orange #E85B00 roof with a 3 px wide blue center stripe #1A3B8C running the full 32 px horizontally, seamlessly tileable; (33) train carriage nose/cab tile — slightly tapered front end with ventilation slits (thin dark lines); (34) inter-carriage coupling tile — a 4 px dark gap with grey coupling connector; (35–47) transparent. Row 3: fully transparent. Maximum 24 colors."
+
+---
+
+**F4 — Elder House Interior Tileset** → save as `tilesets/tileset-house.png`
+
+```
+Output PNG:  512 × 192 px  (16 columns × 6 rows, 96 tile slots, each tile 32×32 px)
+```
+
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 512×192 px PNG. Grid: 16 columns × 6 rows, each tile 32×32 px. Row 0 — floor and wall bases: (0) polished dark hardwood floor #4A2C0A with plank-line grain, seamlessly tileable; (1) hardwood plank-line variant (grain offset); (2) off-white painted plaster wall #EDE8D5, flat, tileable; (3) wall with a horizontal picture rail (thin dark wood rail 4 px from top); (4) wall-floor junction shadow strip; (5) top-left wall corner; (6) top-right wall corner; (7) open doorway; (8) closed door — sturdy dark wood #3D1F0D with brass handle dot #D4A017; (9) wall window — larger than kholi, with two short curtain panels #CC6633 framing the opening; (10–15) transparent. Row 1 — shared furniture top-halves: (16) two-seater sofa top — teal upholstered back #2E8B8B; (17) sofa armrest tile (one end of sofa); (18) wooden desk top #3D1F0D with a small desk lamp (off-white shade, yellow bulb dot); (19) wall-mounted bookshelf — colorful book spines packed horizontally; (20) small side table #6B3A2A with a steel glass on top; (21) framed certificate on wall — cream paper #F5F0DC in gold frame #D4A017; (22–31) transparent. Row 2 — shared furniture bottom-halves: (32) sofa seat and base; (33) sofa armrest base; (34) desk legs and floor; (35–47) transparent. Rows 3–5 — six themed decoration sets, 8 tiles per career, left-to-right: Row 3 tiles 48–55 (Bollywood): film poster wall tile (bold red #CC2200 and gold #FFD700 graphic on cream wall); film reel on shelf (circular dark grey reel with orange #E85B00 film strip); gold award trophy (golden figure on dark base #4A2C0A); director's megaphone (grey cone); clapperboard (black/white striped top, white body); vintage film projector top-half (boxy dark grey body with round lens); vintage projector bottom-half (pedestal base); rolled film script. Row 3 tiles 56–63 (Music): harmonium instrument top-half (dark brown #3D1F0D body, ivory keys #FFFFF0 strip); harmonium bottom-half; tanpura instrument (oval brown gourd #6B3A2A); framed concert photograph (sepia tones); tabla drum pair top-down (two circles #6B3A2A side by side); hand-written music notation sheet; microphone on stand top-down (thin grey stand, grey bulb top); transparent. Row 4 tiles 64–71 (Textile): tailor's mannequin top (beige #D2B48C oval torso on thin grey pole); mannequin pole base; colorful fabric bolt on shelf (rolled magenta #D81B8B fabric); sewing machine top-half (black body #1A1A1A with brass flywheel #D4A017); sewing machine bottom-half; large fabric scissors (silver #C0C0C0); measuring tape looped (yellow #FFD700); thread spool (small colorful cylinder). Row 4 tiles 72–79 (Fitness): dumbbell pair top-down (two grey circles #808080 connected by a bar); rolled yoga mat (purple cylinder #6A0DAD end-on); punching bag top (red oval #CC0000); punching bag bottom (chain link above); wall mirror (wide horizontal silver strip #C0C0C0); resistance band loop (yellow #FFD700 loop); water bottle (blue #1A5276 cylinder); gym trophy (golden cup). Row 5 tiles 80–87 (Food): kitchen counter top-half (white tiled surface with green trim #228B22); counter bottom-half; hanging copper pots top-down (two circles #B87333, side by side); spice jar row (five tiny jars in a line: red #CC2200, yellow #FFD700, brown #8B6914, green #228B22, orange #E67E22); steel pressure cooker top-down (silver disc with valve on top); wooden cutting board with vegetable cross-sections; clay pot top-down (terracotta #CC6633 circle); transparent. Row 5 tiles 88–95 (Cinema): vintage box camera on shelf (#4A4A4A body, brass lens #D4A017); movie clapperboard (black/white stripes); lighting umbrella top-down (large white/silver circle #E0E0E0); flat film reel disc; framed black-and-white photograph; tripod stand top-down (three grey lines converging); director's folding chair top-down; film award statuette (golden figure). Maximum 48 colors total across entire sheet."
+
+---
+
+### G — Vehicles / Animated Props
+
+**G1 — Mumbai Local Train (animated)** → save as `sprites/objects/prop-train.png`
+
+```
+Output PNG:  192 × 128 px
+Grid:        1 column × 4 rows, each frame 192×32 px (4 frames total)
+
+The train passes horizontally. Each frame shows 3 linked carriages (each carriage 64×32 px).
+Frame 0 (y=0):   train position A — rightmost start position
+Frame 1 (y=32):  train position B — shifted 6 px left
+Frame 2 (y=64):  train position C — shifted 12 px left
+Frame 3 (y=96):  train position D — shifted 18 px left
+
+Phaser animates by looping frames 0→3 while also tweening the sprite left.
+Load as: frameWidth: 192, frameHeight: 32
+```
+
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 192×128 px PNG. Grid: 1 column × 4 rows, each frame 192×32 px — 4 sequential animation frames stacked vertically. Each frame shows a top-down view of a Mumbai suburban local train: 3 linked carriages, each carriage exactly 64×32 px wide, connected end-to-end to fill the full 192 px width. Top-down carriage view: the visible surface is the flat roof. Carriage roof: orange #E85B00 fills most of the 64×28 px carriage area (2 px transparent margin on each long side for track gap). A 3-px wide blue stripe #1A3B8C runs horizontally along the center of each carriage roof for its full 64 px length. The outer edges of the roof have a 2-px darker orange shadow #B84500 border. At each inter-carriage joint (at x=64 and x=128): a 3-px dark gap #2A2A2A with tiny grey coupling dots. Left end (motorman's cab): same orange roof but slightly narrower front — a 4-px strip of ventilation slits (thin dark lines 1 px wide, spaced 3 px apart) across the full 32 px height. All 4 frames show the identical train — the position offset is achieved by Phaser tweening, not by drawing the train in different positions. Maximum 14 colors."
+
+**G2 — BEST Bus (animated)** → save as `sprites/objects/prop-bus.png`
+
+```
+Output PNG:  64 × 128 px
+Grid:        1 column × 4 rows, each frame 64×32 px (4 frames total)
+
+All 4 frames are identical — Phaser moves the sprite via tween.
+Load as: frameWidth: 64, frameHeight: 32
+```
+
+> "16-bit pixel art, top-down JRPG style, Game Boy Advance era, vibrant palette, 1-pixel black outlines, strictly no anti-aliasing, transparent PNG background. Output: exactly 64×128 px PNG. Grid: 1 column × 4 rows, each frame 64×32 px — 4 identical frames stacked. Each frame shows a top-down (bird's-eye) view of a Mumbai BEST double-decker bus travelling rightward. Bus body: 58×26 px centered in the 64×32 cell (3 px transparent margin on each side). From above, the roof of the lower deck is red #CC2200 occupying the southern 14 px of the bus body width. The upper deck roof is off-white cream #F5F0DC occupying the northern 12 px. A thin 2-px dark red border #8B0000 runs along the full length of both sides of the bus. Front (right end of the 58 px body): dark tinted blue-grey windscreen #5A7A9A (8×20 px trapezoid). Rear (left end): two tiny red tail-light squares #FF0000 (3×3 px each). No wheels visible in pure top-down (hidden underneath). A 2-px dark shadow strip runs along both long edges of the bus body. All 4 frames are pixel-for-pixel identical. Maximum 14 colors."
+
+---
+
+### H — UI Elements
+
+**H1 — Stats HUD Frame** → save as `ui/hud-frame.png`
+
+```
+Output PNG:  360 × 128 px  (fully opaque, no transparency outside the panel)
+```
+
+> "16-bit pixel art, JRPG stats HUD panel. Output: exactly 360×128 px PNG, fully opaque. The panel spans the full 360 px width. Background fill: very dark navy #0D0D2B. Top edge: a single 2-px horizontal line in gold #DAA520 spanning the full 360 px width. Bottom edge: a 2-px line in dark brass #6B5A2A. Four brass corner ornaments at each corner: an L-shaped 8×8 px brass flourish #B8860B. Layout zones left-to-right: (1) Portrait zone — left 68 px: a 60×60 px inset box with a 2-px dark border #1A1A3E and a warm tan fill #D4A843, centered vertically in the 128 px height (top margin 34 px). Leave the tan interior blank — runtime portrait overlaid by Phaser. (2) Text label zone — center 212 px: three stacked pill-shaped label areas, each a rounded dark rectangle #1A1A3E with a 1-px golden border #DAA520, arranged vertically with 8 px gaps between them. Top pill (y=12, h=30, w=200): 'NAME' label area. Middle pill (y=50, h=30): 'CAREER' label area. Bottom pill (y=88, h=30): 'STAGE' area. Leave interiors blank — runtime text rendered by Phaser. (3) Coin zone — right 80 px: a 16×16 px gold coin icon (#FFD700 circle with black outline and a dark center dot) at top-center of this zone (y=20), below it a 64×28 px dark pill #1A1A3E for the coin number, 1-px gold border. No gradients. Strictly hard-edged pixel art. Maximum 24 colors."
+
+**H2 — Dialogue Box** → save as `ui/dialogue-box.png`
+
+```
+Output PNG:  360 × 96 px  (transparent outside the box border)
+```
+
+> "16-bit pixel art, JRPG dialogue text box. Output: exactly 360×96 px PNG. A 4-px transparent margin on all four sides — the visible box occupies a 352×88 px rectangle centered in the 360×96 canvas. Box frame: 4-px outer border in dark warm-brown #3D1F0D. 2-px inner rule just inside the outer border in slightly lighter #6B3A2A. Interior fill (344×80 px after borders): aged cream parchment #F5EDD5 with subtle texture — horizontal scan lines every 4 px alternating 1-px lighter #FAF4E0 and 1-px darker #E8DFC0 rows against the cream base, to suggest paper grain. Do not draw any text inside the box — interior left blank for Phaser text rendering. Bottom-right corner of interior: a small solid downward-pointing triangle in dark brown #3D1F0D, 8 px wide × 6 px tall, positioned 8 px from the right interior edge and 6 px from the bottom interior edge — this is the 'more text' advance indicator. All other interior area is blank parchment. Maximum 12 colors."
+
+**H3 — D-pad** → save as `ui/dpad.png`
+
+```
+Output PNG:  128 × 128 px  (transparent outside the cross shape)
+All non-transparent pixels at alpha=128 (50% opacity) — PNG alpha channel
+```
+
+> "16-bit pixel art, translucent on-screen D-pad. Output: exactly 128×128 px PNG. Cross/plus shape centered in the canvas: each arm of the cross is 40 px wide and 44 px long, with a 40×40 px center square, forming an overall plus shape that fits within a 40+44+40=124 px span — leaving a 2 px margin on each side. All pixels of the cross shape have alpha=128 (50% transparency via PNG alpha channel). Background (outside the cross) fully transparent (alpha=0). Cross body color: dark brass #6B5A2A. Slightly lighter raised face on the flat surface of each arm: #9B8040 (a 36×40 px rectangle inset 2 px from edges on each arm). Dark shadow edge along outer perimeter of cross: #2A2010 (1-px outline). Center intersection circle: a 32×32 px dark recess circle #4A3A1A. Embossed directional arrows — solid near-black #1A1A0A triangles on each arm: up arm (pointing upward, 10×8 px triangle centered on the arm face); down arm (pointing down); left arm (pointing left); right arm (pointing right). 1-px black outline on all outer edges of the cross shape. No gradients. Maximum 8 colors (opacity via alpha, not blending)."
+
+**H4 — A Button** → save as `ui/btn-a.png`
+
+```
+Output PNG:  64 × 64 px  (transparent outside the circle)
+All non-transparent pixels at alpha=153 (60% opacity)
+```
+
+> "16-bit pixel art, translucent on-screen A action button. Output: exactly 64×64 px PNG. Circle button: 56×56 px circle centered at pixel 32,32 (4 px transparent margin all around). Alpha=153 (60%) on all non-transparent pixels. Base fill: dark red #8B0000. Raised face highlight: lighter red #CC0000 on the top-left quadrant of the circle (a roughly 26×26 px bright zone). Rim: 2-px black #000000 outline on circle perimeter. Top-left arc highlight: 2-px arc of bright #FF4444 just inside the rim on the upper-left. Label: letter 'A' in chunky 12×14 px pixel font (each stroke 2 px wide), solid white #FFFFFF, centered at 32,32. All circle pixels at alpha=153. All background pixels alpha=0. Maximum 8 colors."
+
+**H5 — B Button** → save as `ui/btn-b.png`
+
+```
+Output PNG:  64 × 64 px  (transparent outside the circle)
+All non-transparent pixels at alpha=153 (60% opacity)
+```
+
+> "16-bit pixel art, translucent on-screen B action button. Output: exactly 64×64 px PNG. Identical construction to the A button (56×56 px circle, 4 px margin, alpha=153) but with a deep navy-blue color scheme. Base fill: deep navy #000066. Raised face highlight: medium blue #0000CC on top-left quadrant. Rim: 2-px black #000000. Highlight arc: 2-px #4444FF. Label: letter 'B' in chunky 12×14 px pixel font, solid white #FFFFFF, centered. Maximum 8 colors."
+
+**H6 — Title Screen Background** → save as `ui/title-bg.png`
+
+```
+Output PNG:  360 × 640 px  (fully opaque — no transparency)
+```
+
+> "16-bit pixel art, vertical portrait title screen, Game Boy Advance era style. Output: exactly 360×640 px PNG, fully opaque. Sky (top 256 px, y=0 to y=255): divided into 5 flat horizontal bands with hard step-change edges (strictly no smooth gradients): band 1 (y=0–55, 56 px tall) deep orange #E87722; band 2 (y=56–119, 64 px) amber #F4A23A; band 3 (y=120–175, 56 px) golden #F7C76A; band 4 (y=176–215, 40 px) pale yellow #FAE0A0; band 5 (y=216–255, 40 px) near-white horizon #FFEEC0. Skyline silhouette layer (y=200–380 approx): a dense jagged rooftop silhouette in near-black #0D0D1A — multiple rectangular chawl blocks of varying heights (12–40 px tall) packed edge to edge across the full 360 px width. On rooftops: rectangular plastic water tanks (10×8 px dark boxes), small satellite dishes (cross shapes, 6×6 px), electric poles (2-px vertical lines with 2-px horizontal wire arms curving down). In the far center distance (y=240–280, rendered in a slightly lighter dark navy #1A1A3A to indicate depth): the silhouette of the Gateway of India — a central arch 60 px wide and 40 px tall with flanking smaller towers. Foreground (y=380–640): very dark navy #0D0D2B ground plane, minimal detail — a faint vertical path/road suggestion (slightly lighter #121220) leading toward the bottom edge. Title text 'MUMBAI HERO': positioned y=285–330, centered horizontally. Letters: chunky block pixel font, each letter approximately 28 px tall and 18–22 px wide (depending on letter), 4 px gaps between letters, 2-px black #000000 outline, filled bright gold #FFD700, with a single 2-px white #FFFFFF highlight line along the top of each letter. Subtitle text 'YOUR STORY STARTS HERE': positioned y=342, centered, 8×8 px pixel font, white #FFFFFF, 1-px letter spacing. Maximum 32 colors total."
 
 ---
 

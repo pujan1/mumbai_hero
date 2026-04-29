@@ -1,8 +1,4 @@
 import Phaser from 'phaser';
-import { getPlayerId, getCachedState } from '../services/local-cache.js';
-import { loadState, setOfflineState } from '../services/state-sync.js';
-import { clientGameState } from '../state/game-state.js';
-import { eventBus } from '../utils/event-bus.js';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -10,13 +6,20 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
+    // Each sheet is 557×448 px: 5 cols × 4 rows, frame = 111×112 px
+    this.load.spritesheet('player-boy', 'assets/sprites/characters/player-boy.png', {
+      frameWidth: 111,
+      frameHeight: 112,
+    });
+    this.load.spritesheet('player-girl', 'assets/sprites/characters/player-girl.png', {
+      frameWidth: 111,
+      frameHeight: 112,
+    });
     this.createPlaceholderTextures();
   }
 
   private createPlaceholderTextures(): void {
     const sprites: { key: string; color: number }[] = [
-      { key: 'player-boy', color: 0x4488ff },
-      { key: 'player-girl', color: 0xff88cc },
       { key: 'npc-elder-bollywood', color: 0xffaa00 },
       { key: 'npc-elder-music', color: 0xaa44ff },
       { key: 'npc-elder-textile', color: 0x44ffaa },
@@ -44,70 +47,39 @@ export class BootScene extends Phaser.Scene {
       g.generateTexture(key, 32, 32);
       g.destroy();
     });
-
-    this.createAnimations();
   }
 
   private createAnimations(): void {
+    // Sheet layout: 5 cols × 4 rows, 32×32 per frame
+    // Row 0 = down, Row 1 = up, Row 2 = left, Row 3 = right
+    // Col 0 = idle, Cols 1-4 = walk frames
+    const dirs: { dir: string; idle: number; walkStart: number; walkEnd: number }[] = [
+      { dir: 'down',  idle: 0,  walkStart: 1,  walkEnd: 4  },
+      { dir: 'up',    idle: 5,  walkStart: 6,  walkEnd: 9  },
+      { dir: 'left',  idle: 10, walkStart: 11, walkEnd: 14 },
+      { dir: 'right', idle: 15, walkStart: 16, walkEnd: 19 },
+    ];
+
     ['player-boy', 'player-girl'].forEach((key) => {
-      ['down', 'up', 'left', 'right'].forEach((dir) => {
-        if (!this.anims.exists(`${key.replace('player-', 'player')}-walk-${dir}`)) {
-          this.anims.create({
-            key: `player-walk-${dir}`,
-            frames: [{ key, frame: 0 }],
-            frameRate: 8,
-            repeat: -1,
-          });
-          this.anims.create({
-            key: `player-idle-${dir}`,
-            frames: [{ key, frame: 0 }],
-            frameRate: 1,
-            repeat: -1,
-          });
-        }
+      dirs.forEach(({ dir, idle, walkStart, walkEnd }) => {
+        this.anims.create({
+          key: `${key}-walk-${dir}`,
+          frames: this.anims.generateFrameNumbers(key, { start: walkStart, end: walkEnd }),
+          frameRate: 8,
+          repeat: -1,
+        });
+        this.anims.create({
+          key: `${key}-idle-${dir}`,
+          frames: [{ key, frame: idle }],
+          frameRate: 1,
+          repeat: -1,
+        });
       });
     });
   }
 
   async create(): Promise<void> {
-    const playerId = getPlayerId();
-
-    if (!playerId) {
-      this.scene.start('title-scene');
-      return;
-    }
-
-    try {
-      const state = await loadState();
-      clientGameState.profile = state.profile;
-      clientGameState.progression = state.progression;
-      clientGameState.isOffline = false;
-      clientGameState.isLoaded = true;
-      eventBus.emit('state:updated', state.progression, []);
-    } catch {
-      const cached = getCachedState();
-      if (cached) {
-        const fakeProfile = {
-          playerId,
-          displayName: null,
-          characterChoice: 'boy' as const,
-          createdAt: new Date().toISOString(),
-          lastPlayedAt: new Date().toISOString(),
-          saveVersion: 1,
-        };
-        setOfflineState(fakeProfile, cached);
-        clientGameState.profile = fakeProfile;
-        clientGameState.progression = cached;
-        clientGameState.isOffline = true;
-        clientGameState.isLoaded = true;
-      } else {
-        this.scene.start('title-scene');
-        return;
-      }
-    }
-
-    const sceneId = clientGameState.progression?.currentScene ?? 'kholi-interior-scene';
-    this.scene.launch('hud-scene');
-    this.scene.start(sceneId);
+    this.createAnimations();
+    this.scene.start('title-scene');
   }
 }

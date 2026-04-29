@@ -1,8 +1,8 @@
-import { BaseWorldScene } from '../base-world-scene.js';
+import { BaseIndoorScene } from '../base-indoor-scene.js';
 import type { WorldSceneConfig } from '../base-world-scene.js';
 import { elderFitnessDialogue } from '../../data/dialogues/elder-fitness.js';
 
-export class HouseFitnessScene extends BaseWorldScene {
+export class HouseFitnessScene extends BaseIndoorScene {
   constructor() { super({ key: 'house-fitness-scene' }); }
 
   getSceneConfig(): WorldSceneConfig {

@@ -1,8 +1,8 @@
-import { BaseWorldScene } from '../base-world-scene.js';
+import { BaseIndoorScene } from '../base-indoor-scene.js';
 import type { WorldSceneConfig } from '../base-world-scene.js';
 import { elderFoodDialogue } from '../../data/dialogues/elder-food.js';
 
-export class HouseFoodScene extends BaseWorldScene {
+export class HouseFoodScene extends BaseIndoorScene {
   constructor() { super({ key: 'house-food-scene' }); }
 
   getSceneConfig(): WorldSceneConfig {

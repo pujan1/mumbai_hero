@@ -1,5 +1,6 @@
 import { BaseIndoorScene } from '../base-indoor-scene.js';
 import type { WorldSceneConfig } from '../base-world-scene.js';
+import type { RoomLayout } from '../base-indoor-scene.js';
 import { elderBollywoodDialogue } from '../../data/dialogues/elder-bollywood.js';
 
 export class HouseBollywoodScene extends BaseIndoorScene {
@@ -14,13 +15,22 @@ export class HouseBollywoodScene extends BaseIndoorScene {
     };
   }
 
+  // L-shape: large main hall + private study wing on the right
+  getRoomLayout(): RoomLayout {
+    return {
+      totalCols: 17, totalRows: 12,
+      sections: [
+        { col: 0,  row: 0, cols: 12, rows: 12 },
+        { col: 12, row: 0, cols: 5,  rows: 7  },
+      ],
+    };
+  }
+
   spawnNPCs(): void {
     this.addNPC(5, 4, 'elder-bollywood', 'Ramesh Ji', 'npc-elder-bollywood', elderBollywoodDialogue);
   }
 
   spawnInteractables(): void {
-    this.addInteractable(5, 10, 'house-bollywood-exit', 'Exit', null, {
-      sceneId: 'neighborhood-scene', spawnPoint: 'from-bollywood',
-    });
+    this.addDoor(5, 10, 'house-bollywood-exit', { sceneId: 'neighborhood-scene', spawnPoint: 'from-bollywood' });
   }
 }

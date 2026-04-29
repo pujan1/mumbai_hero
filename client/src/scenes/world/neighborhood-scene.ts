@@ -78,17 +78,14 @@ export class NeighborhoodScene extends BaseOutdoorScene {
   }
 
   spawnInteractables(): void {
-    this.addInteractable(6, 7, 'kholi-door-ext', 'Your Home', null, {
-      sceneId: 'kholi-interior-scene',
-      spawnPoint: 'from-door',
-    });
+    this.addDoor(6, 7, 'kholi-door-ext', { sceneId: 'kholi-interior-scene', spawnPoint: 'from-door' });
 
-    this.addInteractable(4, 4, 'house-bollywood-door', 'Bollywood Elder\'s House', null, { sceneId: 'house-bollywood-scene', spawnPoint: 'default' });
-    this.addInteractable(8, 4, 'house-music-door', 'Singer\'s House', null, { sceneId: 'house-music-scene', spawnPoint: 'default' });
-    this.addInteractable(12, 4, 'house-textile-door', 'Tailor\'s House', null, { sceneId: 'house-textile-scene', spawnPoint: 'default' });
-    this.addInteractable(16, 4, 'house-fitness-door', 'Gym Master\'s House', null, { sceneId: 'house-fitness-scene', spawnPoint: 'default' });
-    this.addInteractable(4, 11, 'house-food-door', 'Cook\'s House', null, { sceneId: 'house-food-scene', spawnPoint: 'default' });
-    this.addInteractable(8, 11, 'house-cinema-door', 'Photographer\'s House', null, { sceneId: 'house-cinema-scene', spawnPoint: 'default' });
+    this.addDoor(4, 4,   'house-bollywood-door', { sceneId: 'house-bollywood-scene', spawnPoint: 'default' });
+    this.addDoor(8, 4,   'house-music-door',     { sceneId: 'house-music-scene',     spawnPoint: 'default' });
+    this.addDoor(12, 4,  'house-textile-door',   { sceneId: 'house-textile-scene',   spawnPoint: 'default' });
+    this.addDoor(16, 4,  'house-fitness-door',   { sceneId: 'house-fitness-scene',   spawnPoint: 'default' });
+    this.addDoor(4, 11,  'house-food-door',      { sceneId: 'house-food-scene',      spawnPoint: 'default' });
+    this.addDoor(8, 11,  'house-cinema-door',    { sceneId: 'house-cinema-scene',    spawnPoint: 'default' });
 
     this.addInteractable(12, 11, 'building-shop-1', 'Kirana Store', comingSoonDialogue);
     this.addInteractable(16, 11, 'building-shop-2', 'Medical', comingSoonDialogue);

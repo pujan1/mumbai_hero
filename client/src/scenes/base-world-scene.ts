@@ -25,6 +25,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   protected npcs: NPC[] = [];
   protected interactables: Interactable[] = [];
   private collisionLayer: Phaser.Tilemaps.TilemapLayer | null = null;
+  private isTransitioning = false;
 
   abstract getSceneConfig(): WorldSceneConfig;
   abstract spawnNPCs(): void;
@@ -110,6 +111,29 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     return interactable;
   }
 
+  protected addDoor(
+    tileX: number,
+    tileY: number,
+    id: string,
+    transition: { sceneId: string; spawnPoint?: string },
+  ): void {
+    const wx = tileX * TILE_SIZE + TILE_SIZE / 2;
+    const wy = tileY * TILE_SIZE + TILE_SIZE / 2;
+
+    // Door frame (dark wood border)
+    this.add.rectangle(wx, wy, TILE_SIZE, TILE_SIZE, 0x5C3317).setDepth(0.5);
+    // Door panel (lighter inset)
+    this.add.rectangle(wx, wy - 2, TILE_SIZE - 6, TILE_SIZE - 10, 0x8B4513).setDepth(0.6);
+    // Brass knob
+    this.add.rectangle(wx + 7, wy - 2, 3, 3, 0xFFD700).setDepth(0.7);
+
+    const onInteract = (): void => { void transitionTo(this, transition); };
+    const interactable = new Interactable(this, {
+      id, label: '', x: wx, y: wy, onInteract, autoTrigger: true,
+    });
+    this.interactables.push(interactable);
+  }
+
   update(_time: number, delta: number): void {
     if (isDialogueOpen()) {
       if (justPressed('action')) {
@@ -121,6 +145,16 @@ export abstract class BaseWorldScene extends Phaser.Scene {
 
     this.player.update(delta, (nx, ny) => this.isColliding(nx, ny));
 
+    // Walk onto a door tile → auto-transition (Pokemon-style, no button needed)
+    if (!this.isTransitioning) {
+      const door = this.findAutoTriggerAtPlayerTile();
+      if (door) {
+        this.isTransitioning = true;
+        door.onInteract();
+        return;
+      }
+    }
+
     if (justPressed('action')) {
       const nearest = this.findNearestInteractable() ?? this.findNearestNPC();
       if (nearest) {
@@ -129,7 +163,8 @@ export abstract class BaseWorldScene extends Phaser.Scene {
           startDialogue(nearest.getDialogueTree(), (callbackId) => {
             this.handleDialogueCallback(callbackId, nearest.npcId);
           });
-        } else {
+        } else if (!nearest.autoTrigger) {
+          // Don't re-fire doors via action button — they're walk-on only
           nearest.onInteract();
         }
       }
@@ -137,10 +172,9 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   }
 
   private isColliding(worldX: number, worldY: number): boolean {
-    if (!this.collisionLayer) {
-      if (worldX < 0 || worldY < 0) return true;
-      return false;
-    }
+    const { x, y, width, height } = this.physics.world.bounds;
+    if (worldX < x || worldY < y || worldX >= x + width || worldY >= y + height) return true;
+    if (!this.collisionLayer) return false;
     const tile = this.collisionLayer.getTileAtWorldXY(worldX, worldY);
     return tile !== null && tile.collides;
   }
@@ -165,6 +199,18 @@ export abstract class BaseWorldScene extends Phaser.Scene {
       const nx = Math.floor(npc.x / TILE_SIZE);
       const ny = Math.floor((npc.y - TILE_SIZE / 2) / TILE_SIZE);
       if (nx === tx && ny === ty) return npc;
+    }
+    return null;
+  }
+
+  private findAutoTriggerAtPlayerTile(): Interactable | null {
+    const px = Math.floor(this.player.x / TILE_SIZE);
+    const py = Math.floor(this.player.y / TILE_SIZE);
+    for (const interactable of this.interactables) {
+      if (!interactable.autoTrigger) continue;
+      const ix = Math.floor(interactable.x / TILE_SIZE);
+      const iy = Math.floor(interactable.y / TILE_SIZE);
+      if (px === ix && py === iy) return interactable;
     }
     return null;
   }

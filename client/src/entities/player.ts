@@ -40,8 +40,11 @@ export class Player extends Phaser.GameObjects.Sprite {
     else if (isDown('right')) { dx = 1; dir = 'right'; }
 
     this.facing = dir;
-    this.facingTileOffsetX = dx;
-    this.facingTileOffsetY = dy;
+    // Derive facing offsets from direction so they persist when the player is idle
+    const OFFSETS: Record<Direction, [number, number]> = {
+      up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0],
+    };
+    [this.facingTileOffsetX, this.facingTileOffsetY] = OFFSETS[this.facing];
 
     if (dx !== 0 || dy !== 0) {
       const nx = this.x + dx * TILE_SIZE;

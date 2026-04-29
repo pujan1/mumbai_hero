@@ -5,51 +5,79 @@ export const INDOOR_MIN_TILES = 10;
 export const INDOOR_MAX_TILES = 20;
 export const INDOOR_DEFAULT_TILES = 12;
 
+export interface RoomSection {
+  col: number;
+  row: number;
+  cols: number;
+  rows: number;
+}
+
+export interface RoomLayout {
+  totalCols: number;
+  totalRows: number;
+  sections: RoomSection[];
+}
+
 export abstract class BaseIndoorScene extends BaseWorldScene {
-  protected getIndoorSize(): { cols: number; rows: number } {
-    return { cols: INDOOR_DEFAULT_TILES, rows: INDOOR_DEFAULT_TILES };
+  protected getRoomLayout(): RoomLayout {
+    return {
+      totalCols: INDOOR_DEFAULT_TILES,
+      totalRows: INDOOR_DEFAULT_TILES,
+      sections: [{ col: 0, row: 0, cols: INDOOR_DEFAULT_TILES, rows: INDOOR_DEFAULT_TILES }],
+    };
+  }
+
+  create(data: { spawnPoint?: string }): void {
+    super.create(data);
+    // Camera centering must happen after super.create() calls startFollow()
+    const layout = this.getRoomLayout();
+    const totalW = layout.totalCols * TILE_SIZE;
+    const totalH = layout.totalRows * TILE_SIZE;
+    if (totalW <= this.scale.width && totalH <= LAYOUT.GAME_HEIGHT) {
+      this.cameras.main.stopFollow();
+      this.cameras.main.centerOn(totalW / 2, totalH / 2);
+    }
   }
 
   protected buildWorld(): void {
-    const raw = this.getIndoorSize();
-    const cols = Math.min(INDOOR_MAX_TILES, Math.max(INDOOR_MIN_TILES, raw.cols));
-    const rows = Math.min(INDOOR_MAX_TILES, Math.max(INDOOR_MIN_TILES, raw.rows));
-    const totalW = cols * TILE_SIZE;
-    const totalH = rows * TILE_SIZE;
+    const layout = this.getRoomLayout();
+    const totalW = layout.totalCols * TILE_SIZE;
+    const totalH = layout.totalRows * TILE_SIZE;
 
-    // Wall background (covers entire area before tiles are drawn)
-    this.add.rectangle(totalW / 2, totalH / 2, totalW, totalH, 0x4a2f0d);
+    for (const section of layout.sections) {
+      const sx = section.col * TILE_SIZE;
+      const sy = section.row * TILE_SIZE;
+      const sw = section.cols * TILE_SIZE;
+      const sh = section.rows * TILE_SIZE;
 
-    // Floor tiles (checkerboard pattern, excluding border walls)
-    for (let r = 1; r < rows - 1; r++) {
-      for (let c = 1; c < cols - 1; c++) {
-        const color = (r + c) % 2 === 0 ? 0xc4a35a : 0xb8943f;
-        this.add.rectangle(
-          c * TILE_SIZE + TILE_SIZE / 2,
-          r * TILE_SIZE + TILE_SIZE / 2,
-          TILE_SIZE - 1, TILE_SIZE - 1, color,
-        );
+      // Wall base (full section area)
+      this.add.rectangle(sx + sw / 2, sy + sh / 2, sw, sh, 0x4a2f0d);
+
+      // Interior floor tiles (checkerboard)
+      for (let r = section.row + 1; r < section.row + section.rows - 1; r++) {
+        for (let c = section.col + 1; c < section.col + section.cols - 1; c++) {
+          const color = (r + c) % 2 === 0 ? 0xc4a35a : 0xb8943f;
+          this.add.rectangle(
+            c * TILE_SIZE + TILE_SIZE / 2,
+            r * TILE_SIZE + TILE_SIZE / 2,
+            TILE_SIZE - 1, TILE_SIZE - 1, color,
+          );
+        }
       }
-    }
 
-    // Window hints on top wall (every 3 tiles)
-    for (let c = 2; c < cols - 2; c += 3) {
-      this.add.rectangle(
-        c * TILE_SIZE + TILE_SIZE / 2,
-        TILE_SIZE / 2,
-        TILE_SIZE - 4, TILE_SIZE - 6, 0x7ab8d4,
-      );
+      // Window hints on the top wall of sections that start at row 0
+      if (section.row === 0) {
+        for (let c = section.col + 2; c < section.col + section.cols - 2; c += 3) {
+          this.add.rectangle(
+            c * TILE_SIZE + TILE_SIZE / 2,
+            TILE_SIZE / 2,
+            TILE_SIZE - 4, TILE_SIZE - 6, 0x7ab8d4,
+          );
+        }
+      }
     }
 
     this.physics.world.setBounds(0, 0, totalW, totalH);
     this.cameras.main.setBounds(0, 0, totalW, totalH);
-
-    // If the room fits inside the viewport, don't let the camera pan — keep it centered
-    const viewportW = this.scale.width;
-    const viewportH = LAYOUT.GAME_HEIGHT;
-    if (totalW <= viewportW && totalH <= viewportH) {
-      this.cameras.main.stopFollow();
-      this.cameras.main.centerOn(totalW / 2, totalH / 2);
-    }
   }
 }

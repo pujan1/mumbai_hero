@@ -5,7 +5,6 @@ import {
   stoveDialogue,
   mirrorDialogue,
   familyPhotoDialogue,
-  kholiDoorDialogue,
 } from '../../data/dialogues/household-objects.js';
 
 export class KholiInteriorScene extends BaseIndoorScene {
@@ -35,9 +34,6 @@ export class KholiInteriorScene extends BaseIndoorScene {
     this.addInteractable(2, 5, 'kholi-stove', 'Stove', stoveDialogue);
     this.addInteractable(9, 3, 'kholi-mirror', 'Mirror', mirrorDialogue);
     this.addInteractable(1, 2, 'kholi-photo', 'Family Photo', familyPhotoDialogue);
-    this.addInteractable(5, 10, 'kholi-door', 'Door', kholiDoorDialogue, {
-      sceneId: 'neighborhood-scene',
-      spawnPoint: 'kholi-door',
-    });
+    this.addDoor(5, 10, 'kholi-door', { sceneId: 'neighborhood-scene', spawnPoint: 'kholi-door' });
   }
 }

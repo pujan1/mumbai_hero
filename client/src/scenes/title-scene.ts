@@ -33,9 +33,8 @@ export class TitleScene extends Phaser.Scene {
       fontSize: '13px', fontFamily: 'monospace', color: '#ffffff',
     }).setOrigin(0.5);
 
-    // frame 0 = idle-down pose; scale down from 111×112 to ~67×67 px for the preview
-    const boySprite = this.add.image(cx - 60, 300, 'player-boy', 0).setScale(0.6);
-    const girlSprite = this.add.image(cx + 60, 300, 'player-girl', 0).setScale(0.6);
+    const boySprite = this.add.image(cx - 60, 300, 'player-boy').setScale(0.8);
+    const girlSprite = this.add.image(cx + 60, 300, 'player-girl').setScale(0.8);
     void boySprite; void girlSprite;
 
     this.boyLabel = this.add.text(cx - 60, 330, 'BOY', {

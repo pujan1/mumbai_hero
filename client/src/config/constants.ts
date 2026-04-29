@@ -1,13 +1,14 @@
-export const TILE_SIZE = 32;
-export const MOVE_DURATION_MS = 200;
+export const TILE_SIZE = 100;
+export const MOVE_DURATION_MS = 220;  // slightly longer per-step at 100px tiles
 
-export const LOGICAL_WIDTH = 360;
-export const LOGICAL_HEIGHT = 640;
+// 12 tiles wide; height uses 19.5:9 iPhone ratio → 1200 × (19.5/9) = 2600
+export const LOGICAL_WIDTH = 1200;
+export const LOGICAL_HEIGHT = 2600;
 
 export const LAYOUT = {
-  HUD_HEIGHT: Math.round(LOGICAL_HEIGHT * 0.20),
-  DIALOGUE_HEIGHT: Math.round(LOGICAL_HEIGHT * 0.13),
-  GAME_HEIGHT: Math.round(LOGICAL_HEIGHT * 0.67),
+  HUD_HEIGHT: Math.round(LOGICAL_HEIGHT * 0.10),       // 260px
+  DIALOGUE_HEIGHT: Math.round(LOGICAL_HEIGHT * 0.08),  // 208px
+  GAME_HEIGHT: Math.round(LOGICAL_HEIGHT * 0.82),      // 2132px  (~21 tiles visible)
 } as const;
 
 export const KEYS = {

@@ -34,6 +34,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   protected abstract buildWorld(): void;
 
   create(data: { spawnPoint?: string }): void {
+    this.isTransitioning = false;
     const cfg = this.getSceneConfig();
     initInputManager(this);
     this.interactionSystem = new InteractionSystem();

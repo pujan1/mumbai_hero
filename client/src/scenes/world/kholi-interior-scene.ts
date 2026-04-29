@@ -25,9 +25,7 @@ export class KholiInteriorScene extends BaseIndoorScene {
     };
   }
 
-  spawnNPCs(): void {
-    // No NPCs in the kholi for MVP
-  }
+  spawnNPCs(): void {}
 
   spawnInteractables(): void {
     this.addInteractable(5, 2, 'kholi-bed', 'Bed', bedDialogue);

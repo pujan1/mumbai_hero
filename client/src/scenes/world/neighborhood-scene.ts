@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import { BaseOutdoorScene } from '../base-outdoor-scene.js';
 import type { WorldSceneConfig } from '../base-world-scene.js';
 import { TILE_SIZE } from '../../config/constants.js';

@@ -1,16 +1,14 @@
-import Phaser from 'phaser';
+import { Scene } from 'phaser';
 import { StatsHUD } from '../ui/stats-hud.js';
 import { DialogueBox } from '../ui/dialogue-box.js';
 import { OnScreenControls } from '../ui/on-screen-controls.js';
 import { MenuOverlay } from '../ui/menu-overlay.js';
 import { BackpackOverlay } from '../ui/backpack-overlay.js';
-import { ShopOverlay, type ShopRequest } from '../ui/shop-overlay.js';
+import { ShopOverlay } from '../ui/shop-overlay.js';
 import { eventBus } from '../utils/event-bus.js';
-import type { DialogueNode, DialogueChoice } from '@mumbai-hero/shared';
 import { clientGameState } from '../state/game-state.js';
-import type { ProgressionState } from '@mumbai-hero/shared';
 
-export class HUDScene extends Phaser.Scene {
+export class HUDScene extends Scene {
   private statsHUD!: StatsHUD;
   private dialogueBox!: DialogueBox;
   private controls!: OnScreenControls;
@@ -33,24 +31,24 @@ export class HUDScene extends Phaser.Scene {
     // The bottom panel is the fallback channel: it only renders for narration
     // (no speaker), unresolved speakers, and choice menus. Speech bubbles in
     // the world scene handle the common case via dialogue:panel:hide.
-    eventBus.on('dialogue:panel:show', (node: unknown, lineIndex: unknown) => {
-      this.dialogueBox.showNode(node as DialogueNode, lineIndex as number);
+    eventBus.on('dialogue:panel:show', (node, lineIndex) => {
+      this.dialogueBox.showNode(node, lineIndex);
     });
 
     eventBus.on('dialogue:panel:hide', () => {
       this.dialogueBox.hide();
     });
 
-    eventBus.on('dialogue:choices', (choices: unknown) => {
-      this.dialogueBox.showChoices(choices as DialogueChoice[]);
+    eventBus.on('dialogue:choices', (choices) => {
+      this.dialogueBox.showChoices(choices);
     });
 
     eventBus.on('dialogue:hide', () => {
       this.dialogueBox.hide();
     });
 
-    eventBus.on('state:updated', (progression: unknown) => {
-      clientGameState.progression = progression as ProgressionState;
+    eventBus.on('state:updated', (progression) => {
+      clientGameState.progression = progression;
       this.statsHUD.refresh();
     });
 
@@ -58,12 +56,20 @@ export class HUDScene extends Phaser.Scene {
       this.statsHUD.refresh();
     });
 
-    eventBus.on('shop:open', (req: unknown) => {
-      this.shop.open(req as ShopRequest);
+    eventBus.on('shop:open', (req) => {
+      this.shop.open(req);
     });
 
     eventBus.on('backpack:toggle', () => {
       this.backpack.toggle();
+    });
+
+    eventBus.on('dialogue:advance-requested', () => {
+      this.dialogueBox.onAdvance();
+    });
+
+    eventBus.on('shop:input', (action) => {
+      this.shop.handleInput(action);
     });
 
     this.statsHUD.refresh();
@@ -80,17 +86,5 @@ export class HUDScene extends Phaser.Scene {
         this.backpack.toggle();
       });
     }
-  }
-
-  getDialogueBox(): DialogueBox {
-    return this.dialogueBox;
-  }
-
-  getBackpack(): BackpackOverlay {
-    return this.backpack;
-  }
-
-  getShop(): ShopOverlay {
-    return this.shop;
   }
 }

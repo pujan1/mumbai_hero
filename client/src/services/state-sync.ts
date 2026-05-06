@@ -18,6 +18,7 @@ import type {
 import { apiClient } from './api-client.js';
 import { setPlayerId, setCachedState } from './local-cache.js';
 import { eventBus } from '../utils/event-bus.js';
+import { normalizeProgressionState } from '../utils/progression-state.js';
 
 export interface SyncedState {
   profile: PlayerProfile;
@@ -36,19 +37,25 @@ function applyUpdate(progression: ProgressionState, events: GameEvent[]): void {
 export async function createPlayer(characterChoice: CharacterChoice): Promise<SyncedState> {
   const res = await apiClient.post('/players', { characterChoice }, CreatePlayerResponseSchema);
   setPlayerId(res.playerId);
-  const progression = res.state as ProgressionState;
-  currentState = { profile: res.profile, progression };
-  setCachedState(progression);
-  return currentState!;
+  const nextState = {
+    profile: res.profile,
+    progression: normalizeProgressionState(res.state),
+  };
+  currentState = nextState;
+  setCachedState(nextState.progression);
+  return nextState;
 }
 
 export async function loadState(): Promise<SyncedState> {
   const res = await apiClient.get('/state', GetStateResponseSchema);
-  const progression = res.progression as ProgressionState;
-  currentState = { profile: res.profile, progression };
-  setCachedState(progression);
+  const nextState = {
+    profile: res.profile,
+    progression: normalizeProgressionState(res.progression),
+  };
+  currentState = nextState;
+  setCachedState(nextState.progression);
   isOffline = false;
-  return currentState!;
+  return nextState;
 }
 
 export function setOfflineState(profile: PlayerProfile, progression: ProgressionState): void {
@@ -66,7 +73,7 @@ export function getCurrentState(): SyncedState | null {
 
 async function postAction(path: string, body: unknown): Promise<void> {
   const res = await apiClient.post(path, body, ActionResponseSchema);
-  applyUpdate(res.state as ProgressionState, res.events);
+  applyUpdate(normalizeProgressionState(res.state), res.events);
 }
 
 export async function talkToNpc(body: TalkToNpcRequest): Promise<void> {

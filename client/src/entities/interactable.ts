@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import { GameObjects, Scene } from 'phaser';
 
 export interface InteractableConfig {
   id: string;
@@ -11,13 +11,13 @@ export interface InteractableConfig {
   autoTrigger?: boolean;
 }
 
-export class Interactable extends Phaser.GameObjects.Zone {
+export class Interactable extends GameObjects.Zone {
   readonly interactableId: string;
   readonly label: string;
   readonly onInteract: () => void;
   readonly autoTrigger: boolean;
 
-  constructor(scene: Phaser.Scene, config: InteractableConfig) {
+  constructor(scene: Scene, config: InteractableConfig) {
     super(scene, config.x, config.y, config.width ?? 32, config.height ?? 32);
     this.interactableId = config.id;
     this.label = config.label;

@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import { Scene, Scenes, type Tilemaps } from 'phaser';
 import { Player } from '../entities/player.js';
 import { NPC, type NPCConfig } from '../entities/npc.js';
 import { Interactable } from '../entities/interactable.js';
@@ -12,7 +12,7 @@ import { clientGameState } from '../state/game-state.js';
 import { eventBus } from '../utils/event-bus.js';
 import { getActiveOverlay } from '../systems/ui-state.js';
 import { SpeechBubble } from '../ui/speech-bubble.js';
-import type { DialogueTree, DialogueNode } from '@mumbai-hero/shared';
+import type { DialogueTree } from '@mumbai-hero/shared';
 
 export type ContextHintKind = 'talk' | 'shop' | 'enter' | 'open' | null;
 export interface ContextHint {
@@ -28,12 +28,12 @@ export interface WorldSceneConfig {
   sceneId: string;
 }
 
-export abstract class BaseWorldScene extends Phaser.Scene {
+export abstract class BaseWorldScene extends Scene {
   protected player!: Player;
   protected interactionSystem!: InteractionSystem;
   protected npcs: NPC[] = [];
   protected interactables: Interactable[] = [];
-  protected collisionLayer: Phaser.Tilemaps.TilemapLayer | null = null;
+  protected collisionLayer: Tilemaps.TilemapLayer | null = null;
   private isTransitioning = false;
   private speechBubble!: SpeechBubble;
   private dialogueUnsubs: Array<() => void> = [];
@@ -82,14 +82,12 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     this.speechBubble = new SpeechBubble(this);
     this.setupDialogueRouting();
 
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.teardownDialogueRouting());
-    this.events.once(Phaser.Scenes.Events.DESTROY, () => this.teardownDialogueRouting());
+    this.events.once(Scenes.Events.SHUTDOWN, () => this.teardownDialogueRouting());
+    this.events.once(Scenes.Events.DESTROY, () => this.teardownDialogueRouting());
   }
 
   private setupDialogueRouting(): void {
-    const onShow = (...args: unknown[]) => {
-      const node = args[0] as DialogueNode;
-      const lineIndex = args[1] as number;
+    const onShow = (node: DialogueTree['nodes'][number], lineIndex: number) => {
       const line = node.lines[lineIndex];
       if (!line) return;
 
@@ -222,8 +220,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     if (isDialogueOpen()) {
       this.emitContext({ kind: null });
       if (justPressed('action')) {
-        const hudScene = this.scene.get('hud-scene') as unknown as { getDialogueBox: () => import('../ui/dialogue-box.js').DialogueBox };
-        hudScene.getDialogueBox().onAdvance();
+        eventBus.emit('dialogue:advance-requested');
       }
       return;
     }
@@ -284,16 +281,12 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   }
 
   private routeShopInput(): void {
-    const hud = this.scene.get('hud-scene') as unknown as {
-      getShop: () => import('../ui/shop-overlay.js').ShopOverlay;
-    };
-    const shop = hud.getShop();
-    if (justPressed('up'))      shop.handleInput('up');
-    if (justPressed('down'))    shop.handleInput('down');
-    if (justPressed('left'))    shop.handleInput('left');
-    if (justPressed('right'))   shop.handleInput('right');
-    if (justPressed('action'))  shop.handleInput('action');
-    if (justPressed('cancel'))  shop.handleInput('cancel');
+    if (justPressed('up'))      eventBus.emit('shop:input', 'up');
+    if (justPressed('down'))    eventBus.emit('shop:input', 'down');
+    if (justPressed('left'))    eventBus.emit('shop:input', 'left');
+    if (justPressed('right'))   eventBus.emit('shop:input', 'right');
+    if (justPressed('action'))  eventBus.emit('shop:input', 'action');
+    if (justPressed('cancel'))  eventBus.emit('shop:input', 'cancel');
   }
 
   private isColliding(worldX: number, worldY: number): boolean {

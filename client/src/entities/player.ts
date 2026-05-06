@@ -1,10 +1,10 @@
-import Phaser from 'phaser';
+import { GameObjects, Scene } from 'phaser';
 import { TILE_SIZE, MOVE_DURATION_MS } from '../config/constants.js';
 import { isDown } from '../systems/input-manager.js';
 
 type Direction = 'up' | 'down' | 'left' | 'right';
 
-export class Player extends Phaser.GameObjects.Sprite {
+export class Player extends GameObjects.Sprite {
   private facing: Direction = 'down';
   private moving = false;
   private moveTimer = 0;
@@ -12,7 +12,7 @@ export class Player extends Phaser.GameObjects.Sprite {
   facingTileOffsetX = 0;
   facingTileOffsetY = 1;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, spriteKey: string) {
+  constructor(scene: Scene, x: number, y: number, spriteKey: string) {
     super(scene, x, y, spriteKey);
     scene.add.existing(this);
     this.setOrigin(0.5, 1);

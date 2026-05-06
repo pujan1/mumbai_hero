@@ -20,11 +20,17 @@ async function request<T>(
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error((err as { error: string }).error ?? res.statusText);
+    throw new Error(getErrorMessage(err, res.statusText));
   }
 
   const data = await res.json();
   return schema.parse(data);
+}
+
+function getErrorMessage(err: unknown, fallback: string): string {
+  if (typeof err !== 'object' || err === null) return fallback;
+  if (!('error' in err)) return fallback;
+  return typeof err.error === 'string' ? err.error : fallback;
 }
 
 export const apiClient = {

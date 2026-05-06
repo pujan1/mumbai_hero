@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import { Scene } from 'phaser';
 import { enterScene } from '../services/state-sync.js';
 
 export interface TransitionTarget {
@@ -7,7 +7,7 @@ export interface TransitionTarget {
 }
 
 export async function transitionTo(
-  currentScene: Phaser.Scene,
+  currentScene: Scene,
   target: TransitionTarget,
 ): Promise<void> {
   const req = target.spawnPoint

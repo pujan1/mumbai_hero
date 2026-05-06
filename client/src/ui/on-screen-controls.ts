@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import { GameObjects, Scene, type Time, type Tweens } from 'phaser';
 import { LOGICAL_WIDTH, LOGICAL_HEIGHT } from '../config/constants.js';
 import { setTouchState } from '../systems/input-manager.js';
 import type { InputAction } from '../systems/input-manager.js';
@@ -20,13 +20,13 @@ const IDLE_ALPHA = 0.42;
 const ACTIVE_ALPHA = 0.85;
 const IDLE_FADE_DELAY = 2000;
 
-export class OnScreenControls extends Phaser.GameObjects.Container {
-  private fadeTween: Phaser.Tweens.Tween | null = null;
-  private idleTimer: Phaser.Time.TimerEvent | null = null;
-  private aLabel!: Phaser.GameObjects.Text;
+export class OnScreenControls extends GameObjects.Container {
+  private fadeTween: Tweens.Tween | null = null;
+  private idleTimer: Time.TimerEvent | null = null;
+  private aLabel!: GameObjects.Text;
   private currentContext: ContextHintKind = null;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Scene) {
     super(scene, 0, 0);
 
     const padX = 250;
@@ -46,10 +46,10 @@ export class OnScreenControls extends Phaser.GameObjects.Container {
     this.setDepth(9);
     this.setAlpha(IDLE_ALPHA);
 
-    eventBus.on('context:hint', (hint: unknown) => this.applyContext(hint as ContextHint));
+    eventBus.on('context:hint', (hint) => this.applyContext(hint));
   }
 
-  private makeActionButton(scene: Phaser.Scene, x: number, y: number): void {
+  private makeActionButton(scene: Scene, x: number, y: number): void {
     const circle = scene.add.circle(x, y, BTN_R, 0xcc3333, 0.85);
     const text = scene.add.text(x, y, 'A', {
       fontSize: FONT,
@@ -67,7 +67,7 @@ export class OnScreenControls extends Phaser.GameObjects.Container {
   }
 
   private makeButton(
-    scene: Phaser.Scene,
+    scene: Scene,
     x: number,
     y: number,
     label: string,
@@ -89,7 +89,7 @@ export class OnScreenControls extends Phaser.GameObjects.Container {
     this.add([circle, text]);
   }
 
-  private makeDPad(scene: Phaser.Scene, cx: number, cy: number): void {
+  private makeDPad(scene: Scene, cx: number, cy: number): void {
     const dirs: { dx: number; dy: number; action: InputAction; label: string }[] = [
       { dx:  0, dy: -1, action: 'up',    label: '▲' },
       { dx:  0, dy:  1, action: 'down',  label: '▼' },

@@ -1,5 +1,6 @@
-import type { ProgressionState } from '@mumbai-hero/shared';
+import { ProgressionStateSchema, type ProgressionState } from '@mumbai-hero/shared';
 import { STATE_CACHE_KEY, PLAYER_ID_KEY } from '../config/constants.js';
+import { normalizeProgressionState } from '../utils/progression-state.js';
 
 export function getPlayerId(): string | null {
   return localStorage.getItem(PLAYER_ID_KEY);
@@ -13,7 +14,9 @@ export function getCachedState(): ProgressionState | null {
   const raw = localStorage.getItem(STATE_CACHE_KEY);
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as ProgressionState;
+    const parsed = ProgressionStateSchema.safeParse(JSON.parse(raw));
+    if (!parsed.success) return null;
+    return normalizeProgressionState(parsed.data);
   } catch {
     return null;
   }

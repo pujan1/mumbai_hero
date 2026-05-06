@@ -1,11 +1,11 @@
-import Phaser from 'phaser';
+import { GameObjects, Scene } from 'phaser';
 import { LOGICAL_WIDTH, LOGICAL_HEIGHT } from '../config/constants.js';
 
-export class MenuOverlay extends Phaser.GameObjects.Container {
-  private bg: Phaser.GameObjects.Rectangle;
+export class MenuOverlay extends GameObjects.Container {
+  private bg: GameObjects.Rectangle;
   private visible_ = false;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Scene) {
     super(scene, 0, 0);
 
     this.bg = scene.add.rectangle(

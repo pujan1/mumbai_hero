@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import { GameObjects, Scene } from 'phaser';
 import { LOGICAL_WIDTH, LOGICAL_HEIGHT } from '../config/constants.js';
 import { clientGameState } from '../state/game-state.js';
 import { eventBus } from '../utils/event-bus.js';
@@ -24,22 +24,22 @@ const PANEL_PADDING = 40;
 
 // Trade window. Talks to InventorySystem for the actual transactions; this
 // class only renders the list and forwards keypresses.
-export class ShopOverlay extends Phaser.GameObjects.Container {
+export class ShopOverlay extends GameObjects.Container {
   private isOpen_ = false;
-  private bg: Phaser.GameObjects.Rectangle;
-  private panel: Phaser.GameObjects.Rectangle;
-  private titleTxt: Phaser.GameObjects.Text;
-  private moneyTxt: Phaser.GameObjects.Text;
-  private tabsTxt: Phaser.GameObjects.Text;
-  private hintTxt: Phaser.GameObjects.Text;
-  private statusTxt: Phaser.GameObjects.Text;
-  private rowChildren: Phaser.GameObjects.GameObject[] = [];
+  private bg: GameObjects.Rectangle;
+  private panel: GameObjects.Rectangle;
+  private titleTxt: GameObjects.Text;
+  private moneyTxt: GameObjects.Text;
+  private tabsTxt: GameObjects.Text;
+  private hintTxt: GameObjects.Text;
+  private statusTxt: GameObjects.Text;
+  private rowChildren: GameObjects.GameObject[] = [];
 
   private tab: Tab = 'buy';
   private cursor = 0;
   private current: ShopRequest | null = null;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Scene) {
     super(scene, 0, 0);
 
     this.bg = scene.add.rectangle(

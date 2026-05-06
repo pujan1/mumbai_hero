@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import { GameObjects, Scene, type Time, type Tweens } from 'phaser';
 import { LOGICAL_WIDTH, LAYOUT } from '../config/constants.js';
 import { clientGameState } from '../state/game-state.js';
 import { getActiveStoryline, getStorylineTitle } from '../systems/story-progression-manager.js';
@@ -6,19 +6,19 @@ import { getActiveStoryline, getStorylineTitle } from '../systems/story-progress
 const IDLE_FADE_DELAY = 3000;
 const IDLE_FADE_ALPHA = 0.55;
 
-export class StatsHUD extends Phaser.GameObjects.Container {
-  private nameTxt: Phaser.GameObjects.Text;
-  private storylineTxt: Phaser.GameObjects.Text;
-  private moneyTxt: Phaser.GameObjects.Text;
-  private offlineBanner: Phaser.GameObjects.Text;
+export class StatsHUD extends GameObjects.Container {
+  private nameTxt: GameObjects.Text;
+  private storylineTxt: GameObjects.Text;
+  private moneyTxt: GameObjects.Text;
+  private offlineBanner: GameObjects.Text;
 
-  private fadeTween: Phaser.Tweens.Tween | null = null;
-  private idleTimer: Phaser.Time.TimerEvent | null = null;
+  private fadeTween: Tweens.Tween | null = null;
+  private idleTimer: Time.TimerEvent | null = null;
   private lastMoney: number | null = null;
   private lastStorylineId: string | null = null;
   private firstRefresh = true;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Scene) {
     super(scene, 0, 0);
 
     const w = LOGICAL_WIDTH;
@@ -62,7 +62,7 @@ export class StatsHUD extends Phaser.GameObjects.Container {
     this.lastMoney = p.money;
 
     const active = getActiveStoryline();
-    const newStorylineId = active ?? null;
+    const newStorylineId = active;
     if (active) {
       this.storylineTxt.setText(getStorylineTitle(active));
     } else {
@@ -104,7 +104,7 @@ export class StatsHUD extends Phaser.GameObjects.Container {
     });
   }
 
-  private pulse(target: Phaser.GameObjects.Text): void {
+  private pulse(target: GameObjects.Text): void {
     this.scene.tweens.killTweensOf(target);
     target.setScale(1);
     this.scene.tweens.add({

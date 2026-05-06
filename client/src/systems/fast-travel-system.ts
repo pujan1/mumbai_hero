@@ -35,5 +35,7 @@ export function getFastTravelNodes(): FastTravelNode[] {
 }
 
 export function getNodeById(id: string): FastTravelNode | null {
-  return nodes.find((n) => n.id === id) ?? null;
+  const node = nodes.find((entry) => entry.id === id);
+  if (!node) return null;
+  return node;
 }

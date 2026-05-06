@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import { GameObjects, Geom, Scene } from 'phaser';
 import { advanceDialogue } from '../systems/dialogue-system.js';
 
 const NPC_FILL = 0xfffbeb;
@@ -15,13 +15,13 @@ const TAIL_HALF_WIDTH = 14;
 const CORNER_RADIUS = 18;
 const MAX_WIDTH = 700;
 
-export class SpeechBubble extends Phaser.GameObjects.Container {
-  private bg: Phaser.GameObjects.Graphics;
-  private text: Phaser.GameObjects.Text;
-  private target: Phaser.GameObjects.GameObject & { x: number; y: number; displayHeight: number } | null = null;
+export class SpeechBubble extends GameObjects.Container {
+  private bg: GameObjects.Graphics;
+  private text: GameObjects.Text;
+  private target: GameObjects.GameObject & { x: number; y: number; displayHeight: number } | null = null;
   private targetOffsetY = 6;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Scene) {
     super(scene, 0, 0);
     this.bg = scene.add.graphics();
     this.text = scene.add.text(0, 0, '', {
@@ -37,14 +37,14 @@ export class SpeechBubble extends Phaser.GameObjects.Container {
     this.setVisible(false);
 
     this.bg.setInteractive(
-      new Phaser.Geom.Rectangle(-MAX_WIDTH / 2, -400, MAX_WIDTH, 400),
-      Phaser.Geom.Rectangle.Contains,
+      new Geom.Rectangle(-MAX_WIDTH / 2, -400, MAX_WIDTH, 400),
+      Geom.Rectangle.Contains,
     );
     this.bg.on('pointerdown', () => advanceDialogue());
   }
 
   show(
-    target: Phaser.GameObjects.GameObject & { x: number; y: number; displayHeight: number },
+    target: GameObjects.GameObject & { x: number; y: number; displayHeight: number },
     text: string,
     isPlayer: boolean,
   ): void {
@@ -132,8 +132,8 @@ export class SpeechBubble extends Phaser.GameObjects.Container {
     this.bg.fillRect(-TAIL_HALF_WIDTH + 1, -TAIL_HEIGHT - 2, TAIL_HALF_WIDTH * 2 - 2, 4);
 
     this.bg.setInteractive(
-      new Phaser.Geom.Rectangle(left, top, w, h + TAIL_HEIGHT),
-      Phaser.Geom.Rectangle.Contains,
+      new Geom.Rectangle(left, top, w, h + TAIL_HEIGHT),
+      Geom.Rectangle.Contains,
     );
   }
 }

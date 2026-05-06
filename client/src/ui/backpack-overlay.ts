@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import { GameObjects, Scene } from 'phaser';
 import { LOGICAL_WIDTH, LOGICAL_HEIGHT } from '../config/constants.js';
 import { clientGameState } from '../state/game-state.js';
 import { eventBus } from '../utils/event-bus.js';
@@ -10,15 +10,15 @@ const COLS = 5;
 const SLOT_SIZE = 140;
 const SLOT_GAP = 18;
 
-export class BackpackOverlay extends Phaser.GameObjects.Container {
+export class BackpackOverlay extends GameObjects.Container {
   private isOpen_ = false;
-  private bg: Phaser.GameObjects.Rectangle;
-  private panel: Phaser.GameObjects.Rectangle;
-  private titleTxt: Phaser.GameObjects.Text;
-  private hintTxt: Phaser.GameObjects.Text;
-  private slotChildren: Phaser.GameObjects.GameObject[] = [];
+  private bg: GameObjects.Rectangle;
+  private panel: GameObjects.Rectangle;
+  private titleTxt: GameObjects.Text;
+  private hintTxt: GameObjects.Text;
+  private slotChildren: GameObjects.GameObject[] = [];
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Scene) {
     super(scene, 0, 0);
 
     this.bg = scene.add.rectangle(

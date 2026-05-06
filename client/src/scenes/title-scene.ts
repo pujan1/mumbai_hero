@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import { GameObjects, Scene } from 'phaser';
 import { LOGICAL_WIDTH, LOGICAL_HEIGHT } from '../config/constants.js';
 import { createPlayer } from '../services/state-sync.js';
 import { clientGameState } from '../state/game-state.js';
@@ -6,11 +6,11 @@ import { eventBus } from '../utils/event-bus.js';
 
 type CharChoice = 'boy' | 'girl';
 
-export class TitleScene extends Phaser.Scene {
+export class TitleScene extends Scene {
   private selected: CharChoice = 'boy';
-  private boyLabel!: Phaser.GameObjects.Text;
-  private girlLabel!: Phaser.GameObjects.Text;
-  private statusText!: Phaser.GameObjects.Text;
+  private boyLabel!: GameObjects.Text;
+  private girlLabel!: GameObjects.Text;
+  private statusText!: GameObjects.Text;
 
   constructor() {
     super({ key: 'title-scene' });

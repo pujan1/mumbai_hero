@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import { GameObjects, Scene } from 'phaser';
 import type { DialogueTree, InventoryItem } from '@mumbai-hero/shared';
 import type { InventoryHolder } from '../systems/inventory-system.js';
 
@@ -19,7 +19,7 @@ export interface NPCConfig {
   shop?: ShopConfig;
 }
 
-export class NPC extends Phaser.GameObjects.Sprite {
+export class NPC extends GameObjects.Sprite {
   readonly npcId: string;
   readonly npcName: string;
   // Mutable so trades update what the merchant has on hand.
@@ -29,7 +29,7 @@ export class NPC extends Phaser.GameObjects.Sprite {
   private dialogueTree: DialogueTree;
 
   constructor(
-    scene: Phaser.Scene,
+    scene: Scene,
     x: number,
     y: number,
     npcId: string,

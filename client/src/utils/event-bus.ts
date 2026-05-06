@@ -1,23 +1,63 @@
-type Listener = (...args: unknown[]) => void;
+import type {
+  DialogueChoice,
+  DialogueNode,
+  GameEvent,
+  ProgressionState,
+} from '@mumbai-hero/shared';
+import type { ContextHint } from '../scenes/base-world-scene.js';
+import type { InputAction } from '../systems/input-manager.js';
+import type { ShopRequest } from '../ui/shop-overlay.js';
+
+type ShopInputAction = Exclude<InputAction, 'start' | 'inventory'>;
+type Listener<TArgs extends unknown[]> = (...args: TArgs) => void;
+
+interface EventMap {
+  'backpack:toggle': [];
+  'context:hint': [ContextHint];
+  'dialogue:advance-requested': [];
+  'dialogue:choices': [DialogueChoice[]];
+  'dialogue:hide': [];
+  'dialogue:panel:hide': [];
+  'dialogue:panel:show': [DialogueNode, number];
+  'dialogue:show': [DialogueNode, number];
+  'hud:refresh': [];
+  'inventory:changed': [];
+  'shop:input': [ShopInputAction];
+  'shop:open': [ShopRequest];
+  'state:updated': [ProgressionState, GameEvent[]];
+}
 
 class EventBus {
-  private listeners: Map<string, Set<Listener>> = new Map();
+  private listeners: { [K in keyof EventMap]: Set<Listener<EventMap[K]>> } = {
+    'backpack:toggle': new Set(),
+    'context:hint': new Set(),
+    'dialogue:advance-requested': new Set(),
+    'dialogue:choices': new Set(),
+    'dialogue:hide': new Set(),
+    'dialogue:panel:hide': new Set(),
+    'dialogue:panel:show': new Set(),
+    'dialogue:show': new Set(),
+    'hud:refresh': new Set(),
+    'inventory:changed': new Set(),
+    'shop:input': new Set(),
+    'shop:open': new Set(),
+    'state:updated': new Set(),
+  };
 
-  on(event: string, listener: Listener): () => void {
-    if (!this.listeners.has(event)) this.listeners.set(event, new Set());
-    this.listeners.get(event)!.add(listener);
+  on<K extends keyof EventMap>(event: K, listener: Listener<EventMap[K]>): () => void {
+    this.listeners[event].add(listener);
     return () => this.off(event, listener);
   }
 
-  off(event: string, listener: Listener): void {
-    this.listeners.get(event)?.delete(listener);
+  off<K extends keyof EventMap>(event: K, listener: Listener<EventMap[K]>): void {
+    this.listeners[event]?.delete(listener);
   }
 
-  emit(event: string, ...args: unknown[]): void {
-    this.listeners.get(event)?.forEach((l) => l(...args));
+  emit<K extends keyof EventMap>(event: K, ...args: EventMap[K]): void {
+    this.listeners[event]?.forEach((listener) => listener(...args));
   }
 
-  once(event: string, listener: Listener): void {
+  once<K extends keyof EventMap>(event: K, listener: Listener<EventMap[K]>): void {
     const unsub = this.on(event, (...args) => {
       listener(...args);
       unsub();

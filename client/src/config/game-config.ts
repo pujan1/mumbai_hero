@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import { AUTO, Scale, type Types } from 'phaser';
 import { LOGICAL_WIDTH, LOGICAL_HEIGHT } from './constants.js';
 import { BootScene } from '../scenes/boot-scene.js';
 import { TitleScene } from '../scenes/title-scene.js';
@@ -12,16 +12,16 @@ import { HouseFitnessScene } from '../scenes/world/house-fitness-scene.js';
 import { HouseFoodScene } from '../scenes/world/house-food-scene.js';
 import { HouseCinemaScene } from '../scenes/world/house-cinema-scene.js';
 
-export const gameConfig: Phaser.Types.Core.GameConfig = {
-  type: Phaser.AUTO,
+export const gameConfig: Types.Core.GameConfig = {
+  type: AUTO,
   width: LOGICAL_WIDTH,
   height: LOGICAL_HEIGHT,
   backgroundColor: '#1a1a2e',
   pixelArt: true,
   antialias: false,
   scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
+    mode: Scale.FIT,
+    autoCenter: Scale.CENTER_BOTH,
   },
   physics: {
     default: 'arcade',

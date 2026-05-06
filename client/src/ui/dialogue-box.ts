@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import { GameObjects, Geom, Math as PhaserMath, Scene, type Tweens } from 'phaser';
 import type { DialogueNode, DialogueChoice } from '@mumbai-hero/shared';
 import { LOGICAL_WIDTH, LOGICAL_HEIGHT, LAYOUT } from '../config/constants.js';
 import { advanceDialogue, selectChoice, forceCloseDialogue } from '../systems/dialogue-system.js';
@@ -12,18 +12,18 @@ const SHOWN_Y = LOGICAL_HEIGHT - LAYOUT.DIALOGUE_HEIGHT;
 const HIDDEN_Y = LOGICAL_HEIGHT + 20;
 const SLIDE_DURATION = 200;
 
-export class DialogueBox extends Phaser.GameObjects.Container {
-  private bg: Phaser.GameObjects.Rectangle;
-  private speakerText: Phaser.GameObjects.Text;
-  private bodyText: Phaser.GameObjects.Text;
-  private choiceTexts: Phaser.GameObjects.Text[] = [];
-  private continueIndicator: Phaser.GameObjects.Triangle;
-  private closeBtn: Phaser.GameObjects.Text;
+export class DialogueBox extends GameObjects.Container {
+  private bg: GameObjects.Rectangle;
+  private speakerText: GameObjects.Text;
+  private bodyText: GameObjects.Text;
+  private choiceTexts: GameObjects.Text[] = [];
+  private continueIndicator: GameObjects.Triangle;
+  private closeBtn: GameObjects.Text;
   private selectedChoice = 0;
   private hasChoices = false;
-  private slideTween: Phaser.Tweens.Tween | null = null;
+  private slideTween: Tweens.Tween | null = null;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Scene) {
     super(scene, 0, HIDDEN_Y);
 
     const w = LOGICAL_WIDTH;
@@ -46,9 +46,10 @@ export class DialogueBox extends Phaser.GameObjects.Container {
       wordWrap: { width: w - 40 },
     });
 
-    this.continueIndicator = scene.add.triangle(w - 24, h - 14, 0, 0, 36, 0, 18, 24, 0xf5c842)
-      .setInteractive(new Phaser.Geom.Rectangle(-30, -30, 90, 60), Phaser.Geom.Rectangle.Contains)
-      .on('pointerdown', () => this.onAdvance()) as Phaser.GameObjects.Triangle;
+    this.continueIndicator = scene.add.triangle(w - 24, h - 14, 0, 0, 36, 0, 18, 24, 0xf5c842);
+    this.continueIndicator
+      .setInteractive(new Geom.Rectangle(-30, -30, 90, 60), Geom.Rectangle.Contains)
+      .on('pointerdown', () => this.onAdvance());
 
     this.closeBtn = scene.add.text(w - 16, 10, '✕', {
       fontSize: '42px',
@@ -106,7 +107,7 @@ export class DialogueBox extends Phaser.GameObjects.Container {
   navigateChoice(dir: 1 | -1): void {
     if (!this.hasChoices) return;
     this.choiceTexts[this.selectedChoice]?.setColor('#f0e6cc');
-    this.selectedChoice = Phaser.Math.Wrap(
+    this.selectedChoice = PhaserMath.Wrap(
       this.selectedChoice + dir,
       0,
       this.choiceTexts.length,

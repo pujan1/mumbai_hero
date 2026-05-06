@@ -6,9 +6,11 @@ export const LOGICAL_WIDTH = 1200;
 export const LOGICAL_HEIGHT = 2600;
 
 export const LAYOUT = {
-  HUD_HEIGHT: Math.round(LOGICAL_HEIGHT * 0.10),       // 260px
-  DIALOGUE_HEIGHT: Math.round(LOGICAL_HEIGHT * 0.08),  // 208px
-  GAME_HEIGHT: Math.round(LOGICAL_HEIGHT * 0.82),      // 2132px  (~21 tiles visible)
+  HUD_HEIGHT: 130,                                      // name + storyline rows
+  DIALOGUE_HEIGHT: Math.round(LOGICAL_HEIGHT * 0.08),  // 208px — slide-up overlay anchored to bottom
+  // Dialogue is a transient overlay rather than a permanent reserve, so the
+  // world camera owns everything below the HUD.
+  GAME_HEIGHT: LOGICAL_HEIGHT - 130, // 2470px
 } as const;
 
 export const KEYS = {

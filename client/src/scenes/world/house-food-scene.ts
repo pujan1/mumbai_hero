@@ -1,15 +1,16 @@
 import { BaseIndoorScene } from '../base-indoor-scene.js';
 import type { WorldSceneConfig } from '../base-world-scene.js';
 import type { RoomLayout } from '../base-indoor-scene.js';
-import { elderFoodDialogue } from '../../data/dialogues/elder-food.js';
+import { elderFoodDialogue } from '../../data/dialogues/index.js';
 
 export class HouseFoodScene extends BaseIndoorScene {
   constructor() { super({ key: 'house-food-scene' }); }
 
   getSceneConfig(): WorldSceneConfig {
     return {
-      mapKey: 'map-house-food', tilesetKey: 'tileset-house',
-      tilesetName: 'house',
+      mapKey: 'map-house-food',
+      tilesetKeys: ['tileset-house-arch', 'tileset-house-fitness-food'],
+      tilesetNames: ['house-arch', 'house-fitness-food'],
       spawnPoints: { default: { x: 5, y: 8 } },
       sceneId: 'house-food-scene',
     };

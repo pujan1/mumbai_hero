@@ -1,15 +1,16 @@
 import { BaseIndoorScene } from '../base-indoor-scene.js';
 import type { WorldSceneConfig } from '../base-world-scene.js';
 import type { RoomLayout } from '../base-indoor-scene.js';
-import { elderCinemaDialogue } from '../../data/dialogues/elder-cinema.js';
+import { elderCinemaDialogue } from '../../data/dialogues/index.js';
 
 export class HouseCinemaScene extends BaseIndoorScene {
   constructor() { super({ key: 'house-cinema-scene' }); }
 
   getSceneConfig(): WorldSceneConfig {
     return {
-      mapKey: 'map-house-cinema', tilesetKey: 'tileset-house',
-      tilesetName: 'house',
+      mapKey: 'map-house-cinema',
+      tilesetKeys: ['tileset-house-arch', 'tileset-house-cinema'],
+      tilesetNames: ['house-arch', 'house-cinema'],
       spawnPoints: { default: { x: 5, y: 8 } },
       sceneId: 'house-cinema-scene',
     };

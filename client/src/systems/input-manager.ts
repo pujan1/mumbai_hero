@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
 
-export type InputAction = 'up' | 'down' | 'left' | 'right' | 'action' | 'cancel' | 'start';
+export type InputAction = 'up' | 'down' | 'left' | 'right' | 'action' | 'cancel' | 'start' | 'inventory';
 
 const touchState: Record<InputAction, boolean> = {
   up: false, down: false, left: false, right: false,
-  action: false, cancel: false, start: false,
+  action: false, cancel: false, start: false, inventory: false,
 };
 
 let cursors: Phaser.Types.Input.Keyboard.CursorKeys | null = null;
@@ -14,6 +14,7 @@ let cancelKey: Phaser.Input.Keyboard.Key | null = null;
 let startKey: Phaser.Input.Keyboard.Key | null = null;
 let spaceKey: Phaser.Input.Keyboard.Key | null = null;
 let shiftKey: Phaser.Input.Keyboard.Key | null = null;
+let inventoryKey: Phaser.Input.Keyboard.Key | null = null;
 
 export function initInputManager(scene: Phaser.Scene): void {
   if (!scene.input.keyboard) return;
@@ -29,6 +30,7 @@ export function initInputManager(scene: Phaser.Scene): void {
   cancelKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.X);
   shiftKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
   startKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+  inventoryKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
 }
 
 export function isDown(action: InputAction): boolean {
@@ -39,9 +41,10 @@ export function isDown(action: InputAction): boolean {
     case 'down': return cursors.down.isDown || (wasd['down']?.isDown ?? false);
     case 'left': return cursors.left.isDown || (wasd['left']?.isDown ?? false);
     case 'right': return cursors.right.isDown || (wasd['right']?.isDown ?? false);
-    case 'action': return (actionKey?.isDown ?? false) || (spaceKey?.isDown ?? false);
-    case 'cancel': return (cancelKey?.isDown ?? false) || (shiftKey?.isDown ?? false);
+    case 'action': return (actionKey?.isDown ?? false) || (spaceKey?.isDown ?? false) || (shiftKey?.isDown ?? false);
+    case 'cancel': return (cancelKey?.isDown ?? false) || (startKey?.isDown ?? false);
     case 'start': return startKey?.isDown ?? false;
+    case 'inventory': return inventoryKey?.isDown ?? false;
     default: return false;
   }
 }
@@ -53,9 +56,10 @@ export function justPressed(action: InputAction): boolean {
     case 'down': return Phaser.Input.Keyboard.JustDown(cursors.down) || Phaser.Input.Keyboard.JustDown(wasd['down'] as Phaser.Input.Keyboard.Key);
     case 'left': return Phaser.Input.Keyboard.JustDown(cursors.left) || Phaser.Input.Keyboard.JustDown(wasd['left'] as Phaser.Input.Keyboard.Key);
     case 'right': return Phaser.Input.Keyboard.JustDown(cursors.right) || Phaser.Input.Keyboard.JustDown(wasd['right'] as Phaser.Input.Keyboard.Key);
-    case 'action': return Phaser.Input.Keyboard.JustDown(actionKey!) || Phaser.Input.Keyboard.JustDown(spaceKey!);
-    case 'cancel': return Phaser.Input.Keyboard.JustDown(cancelKey!) || Phaser.Input.Keyboard.JustDown(shiftKey!);
+    case 'action': return Phaser.Input.Keyboard.JustDown(actionKey!) || Phaser.Input.Keyboard.JustDown(spaceKey!) || Phaser.Input.Keyboard.JustDown(shiftKey!);
+    case 'cancel': return Phaser.Input.Keyboard.JustDown(cancelKey!) || Phaser.Input.Keyboard.JustDown(startKey!);
     case 'start': return Phaser.Input.Keyboard.JustDown(startKey!);
+    case 'inventory': return Phaser.Input.Keyboard.JustDown(inventoryKey!);
     default: return false;
   }
 }

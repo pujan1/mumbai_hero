@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/schemas/api.schema.ts","./src/schemas/game-state.schema.ts","./src/types/api.ts","./src/types/dialogue.ts","./src/types/game-state.ts","./src/types/npc.ts","./src/types/storyline.ts"],"version":"5.9.3"}

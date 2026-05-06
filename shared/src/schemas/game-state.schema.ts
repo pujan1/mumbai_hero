@@ -41,6 +41,7 @@ export const ProgressionStateSchema = z.object({
   money: z.number().nonnegative(),
   energy: z.number().min(0).max(100),
   inventory: z.array(InventoryItemSchema),
+  backpackCapacity: z.number().int().positive().default(25),
   flags: z.record(z.string(), z.boolean()),
   storylines: z.record(StorylineIdSchema, StorylineProgressSchema),
   settings: SettingsSchema,

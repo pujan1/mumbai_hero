@@ -3,6 +3,7 @@ import type { WorldSceneConfig } from '../base-world-scene.js';
 import { TILE_SIZE } from '../../config/constants.js';
 import { getFastTravelNodes } from '../../systems/fast-travel-system.js';
 import type { DialogueTree } from '@mumbai-hero/shared';
+import { comingSoonDialogue, lockedDialogue, ambientDialogues } from '../../data/dialogues/index.js';
 
 // ─── Grid layout (24 cols × 18 rows, each tile = TILE_SIZE px) ───────────────
 //
@@ -18,46 +19,6 @@ import type { DialogueTree } from '@mumbai-hero/shared';
 //  Row 17 : border trees
 // ─────────────────────────────────────────────────────────────────────────────
 
-const comingSoonDialogue: DialogueTree = {
-  id: 'coming-soon',
-  startNode: 'start',
-  nodes: [{ id: 'start', lines: [{ speaker: '', text: 'Coming soon to this neighbourhood!' }] }],
-};
-
-const lockedDialogue: DialogueTree = {
-  id: 'locked',
-  startNode: 'start',
-  nodes: [{ id: 'start', lines: [{ speaker: '', text: 'The door is locked.' }] }],
-};
-
-const ambientDialogues: Record<string, DialogueTree> = {
-  'ambient-chai': {
-    id: 'ambient-chai',
-    startNode: 'start',
-    nodes: [{ id: 'start', lines: [{ speaker: 'Chai Wallah', text: 'Chai? Cutting? Special today, only five rupees!' }] }],
-  },
-  'ambient-cricket': {
-    id: 'ambient-cricket',
-    startNode: 'start',
-    nodes: [{ id: 'start', lines: [{ speaker: 'Cricket Kid', text: 'Dada, you want to play? I need a fielder!' }] }],
-  },
-  'ambient-laundry': {
-    id: 'ambient-laundry',
-    startNode: 'start',
-    nodes: [{ id: 'start', lines: [{ speaker: 'Laundry Aunty', text: 'Arre, you look like you need a good home-cooked meal.' }] }],
-  },
-  'ambient-vendor': {
-    id: 'ambient-vendor',
-    startNode: 'start',
-    nodes: [{ id: 'start', lines: [{ speaker: 'Vegetable Vendor', text: 'Fresh tomatoes, twenty rupees a kilo! Best in the area!' }] }],
-  },
-  'ambient-dog': {
-    id: 'ambient-dog',
-    startNode: 'start',
-    nodes: [{ id: 'start', lines: [{ speaker: '', text: 'The dog wags its tail and sniffs your hand. A friend.' }] }],
-  },
-};
-
 export class NeighborhoodScene extends BaseOutdoorScene {
   constructor() {
     super({ key: 'neighborhood-scene' });
@@ -66,8 +27,8 @@ export class NeighborhoodScene extends BaseOutdoorScene {
   getSceneConfig(): WorldSceneConfig {
     return {
       mapKey: 'map-neighborhood',
-      tilesetKey: 'tileset-neighborhood',
-      tilesetName: 'neighborhood',
+      tilesetKeys: ['tileset-neighborhood-a', 'tileset-neighborhood-b'],
+      tilesetNames: ['neighborhood-a', 'neighborhood-b'],
       spawnPoints: {
         // On Road H2, just outside the kholi door
         default:          { x: 3, y: 11 },
@@ -89,16 +50,60 @@ export class NeighborhoodScene extends BaseOutdoorScene {
   // ── NPCs ────────────────────────────────────────────────────────────────────
 
   spawnNPCs(): void {
-    // Chai Wallah on Road H1 near the station entrance
-    this.addNPC(4, 6, 'ambient-chai-wallah', 'Chai Wallah', 'npc-chai-wallah', ambientDialogues['ambient-chai']!);
+    // Chai Wallah on Road H1 near the station entrance — sells chai cups.
+    this.addNPC(4, 6, 'ambient-chai-wallah', 'Chai Wallah', 'npc-chai-wallah',
+      ambientDialogues['ambient-chai']!,
+      {
+        inventory: [{ itemId: 'chai', quantity: 30 }],
+        shop: {
+          shopName: 'Chai Stall',
+          sells: ['chai'],
+          buys: [],
+        },
+      },
+    );
     // Cricket Kid inside the B2 park
     this.addNPC(11, 9, 'ambient-cricket-kid', 'Cricket Kid', 'npc-cricket-kid', ambientDialogues['ambient-cricket']!);
     // Laundry Aunty in C3 residential block
     this.addNPC(20, 14, 'ambient-laundry-aunty', 'Laundry Aunty', 'npc-laundry-aunty', ambientDialogues['ambient-laundry']!);
-    // Vegetable Vendor on Road H2 near the market
-    this.addNPC(5, 12, 'ambient-vendor', 'Vegetable Vendor', 'npc-vendor', ambientDialogues['ambient-vendor']!);
+    // Vegetable Vendor on Road H2 near the market — full produce shop.
+    this.addNPC(5, 12, 'ambient-vendor', 'Vegetable Vendor', 'npc-vendor',
+      ambientDialogues['ambient-vendor']!,
+      {
+        inventory: [
+          { itemId: 'tomato', quantity: 40 },
+          { itemId: 'onion',  quantity: 40 },
+          { itemId: 'potato', quantity: 40 },
+          { itemId: 'chili',  quantity: 30 },
+        ],
+        shop: {
+          shopName: 'Tomato Cart',
+          sells: ['tomato', 'onion', 'potato', 'chili'],
+          buys: ['tomato', 'onion', 'potato', 'chili'],
+        },
+      },
+    );
     // Street Dog in B2 park
     this.addNPC(12, 8, 'ambient-dog', 'Street Dog', 'npc-dog', ambientDialogues['ambient-dog']!);
+    // Kirana Shopkeeper standing in front of the kirana awning on Road H2.
+    // Stocks staples + sells backpack upgrades.
+    this.addNPC(2, 12, 'shop-kirana', 'Kirana Bhai', 'npc-vendor',
+      ambientDialogues['ambient-vendor']!,
+      {
+        inventory: [
+          { itemId: 'rice', quantity: 20 },
+          { itemId: 'oil',  quantity: 10 },
+          { itemId: 'soap', quantity: 25 },
+          { itemId: 'backpack-medium', quantity: 1 },
+          { itemId: 'backpack-large',  quantity: 1 },
+        ],
+        shop: {
+          shopName: 'Kirana Store',
+          sells: ['rice', 'oil', 'soap', 'backpack-medium', 'backpack-large'],
+          buys: ['rice', 'oil', 'soap'],
+        },
+      },
+    );
   }
 
   // ── Interactables / Doors ───────────────────────────────────────────────────
@@ -306,11 +311,52 @@ export class NeighborhoodScene extends BaseOutdoorScene {
       }
     }
 
+    this.addPlaceholderHouseLabels();
     this.addBuildingCollision();
 
     // Shrink physics bounds inward by one tile so the border tree row/col is impassable.
     this.physics.world.setBounds(TILE_SIZE, TILE_SIZE, W - 2 * TILE_SIZE, H - 2 * TILE_SIZE);
     this.cameras.main.setBounds(0, 0, W, H);
+  }
+
+  // TODO: remove this method once house spritekits/tiled artwork land — these
+  // text labels are temporary placeholders so houses can be told apart at a
+  // glance while the visual blocks are still flat colour.
+  private addPlaceholderHouseLabels(): void {
+    const T = TILE_SIZE;
+    const label = (cx: number, cy: number, text: string, color = '#ffffff') => {
+      this.add
+        .text(cx * T, cy * T, text, {
+          fontSize: '28px',
+          fontFamily: 'monospace',
+          color,
+          fontStyle: 'bold',
+          stroke: '#000000',
+          strokeThickness: 4,
+          align: 'center',
+        })
+        .setOrigin(0.5)
+        .setDepth(0.4);
+    };
+
+    // Row-1 buildings — centred over the rooftop band (rows 1-2)
+    label(3.5,  2.5, 'TRAIN\nSTATION');
+    label(10,   2.5, 'BOLLYWOOD');
+    label(13,   2.5, 'MUSIC');
+    label(18,   2.5, 'TEXTILE');
+    label(21,   2.5, 'FITNESS');
+
+    // Row-2 buildings
+    label(3.5,  8.5, 'KHOLI');
+    label(11.5, 8.5, 'PARK',     '#ffffaa');
+    label(18,   8.5, 'FOOD');
+    label(21,   8.5, 'CINEMA');
+
+    // Row-3 buildings
+    label(2,    14.5, 'KIRANA');
+    label(5,    14.5, 'MEDICAL');
+    label(11.5, 14.5, 'OFFICE');
+    label(19.5, 14.5, 'HOUSE');
   }
 
   // Marks every tile inside a building block as solid, with optional door exceptions.

@@ -21,6 +21,10 @@ export class BootScene extends Phaser.Scene {
       frameHeight: 100,
     });
 
+    this.load.image('tileset-kholi-a', 'assets/tilesets/tileset-kholi-a.png');
+    this.load.image('tileset-kholi-b', 'assets/tilesets/tileset-kholi-b.png');
+    this.load.tilemapTiledJSON('map-kholi', 'assets/maps/kholi-interior.tmj');
+
     this.createPlaceholderTextures();
   }
 
@@ -37,10 +41,14 @@ export class BootScene extends Phaser.Scene {
       { key: 'npc-laundry-aunty',  color: 0x44cccc },
       { key: 'npc-vendor',         color: 0x888844 },
       { key: 'npc-dog',            color: 0xcc9966 },
-      { key: 'tileset-kholi',      color: 0x8b6914 },
-      { key: 'tileset-neighborhood',color: 0x4a7a3d },
-      { key: 'tileset-train',      color: 0x445566 },
-      { key: 'tileset-house',      color: 0x996644 },
+{ key: 'tileset-neighborhood-a',       color: 0x4a7a3d },
+      { key: 'tileset-neighborhood-b',       color: 0x3d6630 },
+      { key: 'tileset-train',                color: 0x445566 },
+      { key: 'tileset-house-arch',           color: 0x996644 },
+      { key: 'tileset-house-shared',         color: 0x885533 },
+      { key: 'tileset-house-music-textile',  color: 0x774422 },
+      { key: 'tileset-house-fitness-food',   color: 0x993333 },
+      { key: 'tileset-house-cinema',         color: 0x334466 },
     ];
 
     textures.forEach(({ key, color }) => {

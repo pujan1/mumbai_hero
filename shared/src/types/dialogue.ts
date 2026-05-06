@@ -1,11 +1,15 @@
 export interface DialogueLine {
   speaker: string;
   text: string;
+  isPlayer?: boolean;
 }
 
 export interface DialogueChoice {
   text: string;
-  next: string;
+  reply?: DialogueLine[];
+  next?: string;
+  condition?: string;
+  onComplete?: string;
 }
 
 export interface DialogueNode {

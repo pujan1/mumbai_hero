@@ -1,3 +1,5 @@
+import { fastTravelStubs } from '../data/dialogues/index.js';
+
 export interface FastTravelNode {
   id: string;
   label: string;
@@ -15,7 +17,7 @@ const nodes: FastTravelNode[] = [
     // Road H1, south lane — directly in front of the A1 station building
     tileX: 3,
     tileY: 6,
-    stubDialogue: 'Trains to other parts of Mumbai coming soon!',
+    stubDialogue: fastTravelStubs['train-station']!,
   },
   {
     id: 'bus-stop',
@@ -24,7 +26,7 @@ const nodes: FastTravelNode[] = [
     // Road H1, south lane — near the B1 block
     tileX: 13,
     tileY: 6,
-    stubDialogue: 'Bus routes across the city coming soon!',
+    stubDialogue: fastTravelStubs['bus-stop']!,
   },
 ];
 

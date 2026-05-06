@@ -1,15 +1,16 @@
 import { BaseIndoorScene } from '../base-indoor-scene.js';
 import type { WorldSceneConfig } from '../base-world-scene.js';
 import type { RoomLayout } from '../base-indoor-scene.js';
-import { elderTextileDialogue } from '../../data/dialogues/elder-textile.js';
+import { elderTextileDialogue } from '../../data/dialogues/index.js';
 
 export class HouseTextileScene extends BaseIndoorScene {
   constructor() { super({ key: 'house-textile-scene' }); }
 
   getSceneConfig(): WorldSceneConfig {
     return {
-      mapKey: 'map-house-textile', tilesetKey: 'tileset-house',
-      tilesetName: 'house',
+      mapKey: 'map-house-textile',
+      tilesetKeys: ['tileset-house-arch', 'tileset-house-music-textile'],
+      tilesetNames: ['house-arch', 'house-music-textile'],
       spawnPoints: { default: { x: 5, y: 8 } },
       sceneId: 'house-textile-scene',
     };

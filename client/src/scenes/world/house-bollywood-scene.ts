@@ -1,15 +1,16 @@
 import { BaseIndoorScene } from '../base-indoor-scene.js';
 import type { WorldSceneConfig } from '../base-world-scene.js';
 import type { RoomLayout } from '../base-indoor-scene.js';
-import { elderBollywoodDialogue } from '../../data/dialogues/elder-bollywood.js';
+import { elderBollywoodDialogue } from '../../data/dialogues/index.js';
 
 export class HouseBollywoodScene extends BaseIndoorScene {
   constructor() { super({ key: 'house-bollywood-scene' }); }
 
   getSceneConfig(): WorldSceneConfig {
     return {
-      mapKey: 'map-house-bollywood', tilesetKey: 'tileset-house',
-      tilesetName: 'house',
+      mapKey: 'map-house-bollywood',
+      tilesetKeys: ['tileset-house-arch', 'tileset-house-shared'],
+      tilesetNames: ['house-arch', 'house-shared'],
       spawnPoints: { default: { x: 5, y: 8 } },
       sceneId: 'house-bollywood-scene',
     };

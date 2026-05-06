@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node utils/resize-image.mjs client/public/assets/tilesets/tileset-kholi-a.png --width 500 --height 500)",
+      "Bash(node utils/resize-image.mjs client/public/assets/tilesets/tileset-kholi-a.png --width 500 --height 400)",
+      "Bash(node utils/resize-image.mjs client/public/assets/tilesets/tileset-kholi-a.png --width 500 --height 400 --overwrite)",
+      "Bash(python3 -m json.tool)",
+      "Bash(identify /Users/pujan/Desktop/project/mumbai_hero/client/public/assets/tilesets/tileset-kholi-b.png)",
+      "Bash(python3 -c ' *)",
+      "Bash(node -e ' *)"
+    ]
+  }
+}

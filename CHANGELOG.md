@@ -1,6 +1,35 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.4]
+
+### Added
+
+- **Inventory, backpack, and trading loop** (`client/src/data/items.ts`, `client/src/systems/inventory-system.ts`, `client/src/ui/backpack-overlay.ts`, `client/src/ui/shop-overlay.ts`, `client/src/systems/ui-state.ts`): Added a static item registry, generic inventory helpers, player money/capacity management, a 25-slot backpack with upgrade support, and buy/sell overlays for merchant NPCs.
+- **Merchant NPC support** (`client/src/entities/npc.ts`, `client/src/scenes/world/neighborhood-scene.ts`): NPCs can now carry inventories and expose shop configs. Chai Wallah sells chai, the vegetable vendor trades produce, and a new Kirana Bhai merchant sells staples plus backpack upgrades.
+- **Speech-bubble dialogue presentation** (`client/src/ui/speech-bubble.ts`, `client/src/scenes/base-world-scene.ts`): Added speaker-anchored world-space speech bubbles with tap-to-advance, while narration and off-scene speakers still fall back to the HUD dialogue panel.
+- **Locale-based dialogue structure** (`client/src/data/dialogues/config.ts`, `client/src/data/dialogues/index.ts`, `client/src/data/dialogues/locales/`): Dialogue data is now organized by locale. Added an `en-hinglish` pack, a Hindi locale stub, and centralized exports for elder, ambient, household, and fast-travel dialogue.
+- **Authored Kholi tilemap assets** (`client/public/assets/maps/kholi-interior.tmj`, `client/public/assets/tilesets/tileset-kholi-a.png`, `client/public/assets/tilesets/tileset-kholi-b.png`): Added the first Tiled-authored interior map plus split Kholi tileset sheets for multi-tileset rendering.
+- **Image resize helper** (`utils/resize-image.mjs`): Added a `sharp`-based utility for resizing generated art into the tilemap pipeline.
+
+### Changed
+
+- **Dialogue flow and schema** (`client/src/systems/dialogue-system.ts`, `shared/src/types/dialogue.ts`, `docs/DIALOGUE-FORMAT.md`): Choices can now be conditionally hidden, fire their own callbacks, include inline NPC replies, and echo the player's selected line before continuing or closing.
+- **World interaction model** (`client/src/scenes/base-world-scene.ts`, `client/src/systems/input-manager.ts`): The action button now context-switches between talking, shopping, and object interaction; modal overlays block world input; `Shift` also confirms, while `Enter` doubles as cancel/close for overlays.
+- **HUD and dialogue UI behavior** (`client/src/ui/dialogue-box.ts`, `client/src/scenes/hud-scene.ts`, `client/src/ui/on-screen-controls.ts`, `client/src/ui/stats-hud.ts`, `client/src/config/constants.ts`): Dialogue became a slide-up bottom overlay with a close button, the A button label now reflects nearby context (`TALK`, `SHOP`, `OPEN`), and both controls/HUD now wake and fade based on recent interaction.
+- **Indoor scene rendering pipeline** (`client/src/scenes/base-indoor-scene.ts`, `client/src/scenes/world/kholi-interior-scene.ts`, `client/src/scenes/world/house-*.ts`, `client/src/scenes/boot-scene.ts`): Indoor scenes now accept multiple tilesets by name/key, prefer authored TMJ maps when present, and fall back to procedural rendering otherwise. House scenes were rewired to split architecture/shared/theme-specific tilesets.
+- **Neighborhood presentation and data wiring** (`client/src/scenes/world/neighborhood-scene.ts`, `client/src/systems/fast-travel-system.ts`): Ambient and stub dialogue now come from locale packs, placeholder labels identify buildings in the 3×3 grid, and fast-travel stub text is centralized with the rest of the dialogue content.
+- **Shared progression defaults** (`shared/src/types/game-state.ts`, `shared/src/schemas/game-state.schema.ts`): Progression state now tracks `backpackCapacity`, starts players with ₹100, and defaults backpack capacity to 25 slots.
+- **Tileset documentation pipeline** (`docs/assets/04-tilesets.md`): Reworked the asset spec around split 500×500 sheets, per-sheet frame maps, scene-to-tileset mapping, and Tiled `firstgid` notes.
+
+### Fixed
+
+- **Choice dead-ends and boilerplate nodes** (`client/src/systems/dialogue-system.ts`): Dialogue can now end cleanly after a choice reply without forcing a dummy follow-up node.
+- **Dialogue dismissal UX** (`client/src/ui/dialogue-box.ts`): Players can now force-close dialogue from the HUD panel instead of being locked into advancing line by line.
+- **Input leakage while overlays are open** (`client/src/scenes/base-world-scene.ts`, `client/src/scenes/hud-scene.ts`): Backpack/shop menus now properly capture input so movement and world interactions do not continue underneath.
+
+---
+
+## [1.0.3]
 
 ### Added
 

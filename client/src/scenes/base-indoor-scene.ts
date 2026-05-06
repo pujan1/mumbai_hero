@@ -40,20 +40,40 @@ export abstract class BaseIndoorScene extends BaseWorldScene {
   }
 
   protected buildWorld(): void {
+    const cfg = this.getSceneConfig();
     const layout = this.getRoomLayout();
     const totalW = layout.totalCols * TILE_SIZE;
     const totalH = layout.totalRows * TILE_SIZE;
 
+    if (this.cache.tilemap.has(cfg.mapKey)) {
+      const map = this.make.tilemap({ key: cfg.mapKey });
+      const tilesets = cfg.tilesetNames.map((name, i) =>
+        map.addTilesetImage(name, cfg.tilesetKeys[i])!,
+      );
+
+      for (const layerData of map.layers) {
+        const layer = map.createLayer(layerData.name, tilesets, 0, 0);
+        if (!layer) continue;
+        if (layerData.name === 'collision') {
+          layer.setCollisionByExclusion([-1, 0]);
+          this.collisionLayer = layer;
+        }
+      }
+
+      this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+      this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+      return;
+    }
+
+    // Procedural fallback while tilemap is not yet authored
     for (const section of layout.sections) {
       const sx = section.col * TILE_SIZE;
       const sy = section.row * TILE_SIZE;
       const sw = section.cols * TILE_SIZE;
       const sh = section.rows * TILE_SIZE;
 
-      // Wall base (full section area)
       this.add.rectangle(sx + sw / 2, sy + sh / 2, sw, sh, 0x4a2f0d);
 
-      // Interior floor tiles (checkerboard)
       for (let r = section.row + 1; r < section.row + section.rows - 1; r++) {
         for (let c = section.col + 1; c < section.col + section.cols - 1; c++) {
           const color = (r + c) % 2 === 0 ? 0xc4a35a : 0xb8943f;
@@ -65,7 +85,6 @@ export abstract class BaseIndoorScene extends BaseWorldScene {
         }
       }
 
-      // Window hints on the top wall of sections that start at row 0
       if (section.row === 0) {
         for (let c = section.col + 2; c < section.col + section.cols - 2; c += 3) {
           this.add.rectangle(

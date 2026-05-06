@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Player } from '../entities/player.js';
-import { NPC } from '../entities/npc.js';
+import { NPC, type NPCConfig } from '../entities/npc.js';
 import { Interactable } from '../entities/interactable.js';
 import { InteractionSystem } from '../systems/interaction-system.js';
 import { initInputManager, justPressed } from '../systems/input-manager.js';
@@ -9,12 +9,21 @@ import { transitionTo } from '../systems/scene-transition-manager.js';
 import { talkToNpc, interactWithObject } from '../services/state-sync.js';
 import { TILE_SIZE, LAYOUT } from '../config/constants.js';
 import { clientGameState } from '../state/game-state.js';
-import type { DialogueTree } from '@mumbai-hero/shared';
+import { eventBus } from '../utils/event-bus.js';
+import { getActiveOverlay } from '../systems/ui-state.js';
+import { SpeechBubble } from '../ui/speech-bubble.js';
+import type { DialogueTree, DialogueNode } from '@mumbai-hero/shared';
+
+export type ContextHintKind = 'talk' | 'shop' | 'enter' | 'open' | null;
+export interface ContextHint {
+  kind: ContextHintKind;
+  label?: string;
+}
 
 export interface WorldSceneConfig {
   mapKey: string;
-  tilesetKey: string;
-  tilesetName: string;
+  tilesetKeys: string[];
+  tilesetNames: string[];
   spawnPoints: Record<string, { x: number; y: number }>;
   sceneId: string;
 }
@@ -24,10 +33,11 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   protected interactionSystem!: InteractionSystem;
   protected npcs: NPC[] = [];
   protected interactables: Interactable[] = [];
-  private collisionLayer: Phaser.Tilemaps.TilemapLayer | null = null;
+  protected collisionLayer: Phaser.Tilemaps.TilemapLayer | null = null;
   private isTransitioning = false;
-  private lastAutoNpcId: string | null = null;
-  private wasInDialogue = false;
+  private speechBubble!: SpeechBubble;
+  private dialogueUnsubs: Array<() => void> = [];
+  private lastContextKey: string | null = null;
 
   // Solid tile positions populated by subclasses (e.g. building footprints).
   // Key format: "col,row". Checked in isColliding() before tilemap layer.
@@ -61,13 +71,62 @@ export abstract class BaseWorldScene extends Phaser.Scene {
 
     this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
     this.cameras.main.setViewport(
-      0, LAYOUT.HUD_HEIGHT + LAYOUT.DIALOGUE_HEIGHT,
+      0, LAYOUT.HUD_HEIGHT,
       this.scale.width, LAYOUT.GAME_HEIGHT,
     );
 
     this.spawnNPCs();
     this.spawnInteractables();
     this.interactables.forEach((i) => this.interactionSystem.register(i));
+
+    this.speechBubble = new SpeechBubble(this);
+    this.setupDialogueRouting();
+
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.teardownDialogueRouting());
+    this.events.once(Phaser.Scenes.Events.DESTROY, () => this.teardownDialogueRouting());
+  }
+
+  private setupDialogueRouting(): void {
+    const onShow = (...args: unknown[]) => {
+      const node = args[0] as DialogueNode;
+      const lineIndex = args[1] as number;
+      const line = node.lines[lineIndex];
+      if (!line) return;
+
+      const target = line.speaker ? this.resolveSpeaker(line.speaker, line.isPlayer === true) : null;
+      if (target) {
+        this.speechBubble.show(target, line.text, line.isPlayer === true);
+        eventBus.emit('dialogue:panel:hide');
+      } else {
+        // Narration, or speaker not in this scene → fall back to bottom panel.
+        this.speechBubble.hideImmediate();
+        eventBus.emit('dialogue:panel:show', node, lineIndex);
+      }
+    };
+    const onChoices = () => {
+      this.speechBubble.hideImmediate();
+    };
+    const onHide = () => {
+      this.speechBubble.hideImmediate();
+    };
+
+    this.dialogueUnsubs.push(
+      eventBus.on('dialogue:show', onShow),
+      eventBus.on('dialogue:choices', onChoices),
+      eventBus.on('dialogue:hide', onHide),
+    );
+  }
+
+  private teardownDialogueRouting(): void {
+    this.dialogueUnsubs.forEach((unsub) => unsub());
+    this.dialogueUnsubs = [];
+    this.lastContextKey = null;
+    eventBus.emit('context:hint', { kind: null });
+  }
+
+  private resolveSpeaker(speakerName: string, isPlayer: boolean): Player | NPC | null {
+    if (isPlayer) return this.player;
+    return this.npcs.find((n) => n.npcName === speakerName) ?? null;
   }
 
   protected addNPC(
@@ -77,6 +136,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
     npcName: string,
     spriteKey: string,
     dialogue: DialogueTree,
+    config: NPCConfig = {},
   ): NPC {
     const npc = new NPC(
       this,
@@ -86,6 +146,7 @@ export abstract class BaseWorldScene extends Phaser.Scene {
       npcName,
       spriteKey,
       dialogue,
+      config,
     );
     this.npcs.push(npc);
     return npc;
@@ -142,19 +203,29 @@ export abstract class BaseWorldScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
+    this.speechBubble?.refreshPosition();
+
+    const overlay = getActiveOverlay();
+    if (overlay === 'shop') {
+      this.routeShopInput();
+      return;
+    }
+    if (overlay === 'backpack') {
+      // BackpackOverlay's open/close is handled by HUDScene's keydown-I, but
+      // X/cancel should also close it.
+      if (justPressed('cancel')) {
+        eventBus.emit('backpack:toggle');
+      }
+      return;
+    }
+
     if (isDialogueOpen()) {
-      this.wasInDialogue = true;
+      this.emitContext({ kind: null });
       if (justPressed('action')) {
         const hudScene = this.scene.get('hud-scene') as unknown as { getDialogueBox: () => import('../ui/dialogue-box.js').DialogueBox };
         hudScene.getDialogueBox().onAdvance();
       }
       return;
-    }
-
-    // Dialogue just closed → clear lock so player can re-trigger by walking away
-    if (this.wasInDialogue) {
-      this.wasInDialogue = false;
-      this.lastAutoNpcId = null;
     }
 
     this.player.update(delta, (nx, ny) => this.isColliding(nx, ny));
@@ -169,28 +240,60 @@ export abstract class BaseWorldScene extends Phaser.Scene {
       }
     }
 
-    // Auto-start dialogue when the player is adjacent to and facing an NPC
     const facingNPC = this.findNearestNPC();
-    if (facingNPC) {
-      if (facingNPC.npcId !== this.lastAutoNpcId) {
-        this.lastAutoNpcId = facingNPC.npcId;
+    const nearest = facingNPC ? null : this.findNearestInteractable();
+    this.emitContext(this.contextFor(facingNPC, nearest));
+
+    // Action button: talk to the facing NPC, or interact with a non-door object
+    if (justPressed('action')) {
+      if (facingNPC) {
+        if (facingNPC.shop) {
+          // Shopkeeper / vendor: skip dialogue, open trade window directly.
+          void talkToNpc({ npcId: facingNPC.npcId });
+          eventBus.emit('shop:open', {
+            shop: facingNPC.shop,
+            merchant: facingNPC.asInventoryHolder(),
+          });
+          return;
+        }
         void talkToNpc({ npcId: facingNPC.npcId });
         startDialogue(facingNPC.getDialogueTree(), (callbackId) => {
           this.handleDialogueCallback(callbackId, facingNPC.npcId);
         });
-      }
-    } else {
-      // No NPC in facing tile → reset so the same NPC can be triggered again later
-      this.lastAutoNpcId = null;
-    }
-
-    // Action button still needed for non-door interactables (signs, fast-travel, etc.)
-    if (justPressed('action')) {
-      const nearest = this.findNearestInteractable();
-      if (nearest && !nearest.autoTrigger) {
+      } else if (nearest && !nearest.autoTrigger) {
         nearest.onInteract();
       }
     }
+  }
+
+  private contextFor(facingNPC: NPC | null, nearest: Interactable | null): ContextHint {
+    if (facingNPC) return { kind: facingNPC.shop ? 'shop' : 'talk' };
+    if (nearest && !nearest.autoTrigger) {
+      const hint: ContextHint = { kind: 'open' };
+      if (nearest.label) hint.label = nearest.label;
+      return hint;
+    }
+    return { kind: null };
+  }
+
+  private emitContext(hint: ContextHint): void {
+    const key = `${hint.kind ?? ''}|${hint.label ?? ''}`;
+    if (key === this.lastContextKey) return;
+    this.lastContextKey = key;
+    eventBus.emit('context:hint', hint);
+  }
+
+  private routeShopInput(): void {
+    const hud = this.scene.get('hud-scene') as unknown as {
+      getShop: () => import('../ui/shop-overlay.js').ShopOverlay;
+    };
+    const shop = hud.getShop();
+    if (justPressed('up'))      shop.handleInput('up');
+    if (justPressed('down'))    shop.handleInput('down');
+    if (justPressed('left'))    shop.handleInput('left');
+    if (justPressed('right'))   shop.handleInput('right');
+    if (justPressed('action'))  shop.handleInput('action');
+    if (justPressed('cancel'))  shop.handleInput('cancel');
   }
 
   private isColliding(worldX: number, worldY: number): boolean {

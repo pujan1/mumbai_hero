@@ -38,10 +38,13 @@ export interface ProgressionState {
   money: number;
   energy: number;
   inventory: InventoryItem[];
+  backpackCapacity: number;
   flags: Record<string, boolean>;
   storylines: Record<StorylineId, StorylineProgress>;
   settings: Settings;
 }
+
+export const DEFAULT_BACKPACK_CAPACITY = 25;
 
 export interface GameEvent {
   id: string;
@@ -65,9 +68,10 @@ export function createInitialProgression(): ProgressionState {
   return {
     currentScene: 'kholi-interior-scene',
     spawnPoint: 'default',
-    money: 0,
+    money: 100,
     energy: 100,
     inventory: [],
+    backpackCapacity: DEFAULT_BACKPACK_CAPACITY,
     flags: {},
     storylines: {
       bollywood: { ...DEFAULT_STORYLINE_PROGRESS },

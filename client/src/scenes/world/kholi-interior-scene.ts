@@ -5,7 +5,7 @@ import {
   stoveDialogue,
   mirrorDialogue,
   familyPhotoDialogue,
-} from '../../data/dialogues/household-objects.js';
+} from '../../data/dialogues/index.js';
 
 export class KholiInteriorScene extends BaseIndoorScene {
   constructor() {
@@ -15,8 +15,8 @@ export class KholiInteriorScene extends BaseIndoorScene {
   getSceneConfig(): WorldSceneConfig {
     return {
       mapKey: 'map-kholi',
-      tilesetKey: 'tileset-kholi',
-      tilesetName: 'kholi',
+      tilesetKeys: ['tileset-kholi-a', 'tileset-kholi-b'],
+      tilesetNames: ['kholi-a', 'kholi-b'],
       spawnPoints: {
         default: { x: 5, y: 8 },
         'from-door': { x: 5, y: 9 },
